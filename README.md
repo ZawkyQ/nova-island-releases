@@ -16,13 +16,11 @@
 
 ## Требования
 
-- Windows 11, x64.
-- [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0).
-- [Windows App Runtime 2.7](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads).
+- Windows 11, x64. Начиная с 1.0 ничего ставить заранее не нужно: .NET 10 и Windows App Runtime входят в пакет. Для версий 0.11.x нужны [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) и [Windows App Runtime 2.7](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads).
 - Для статуса в Discord — приложение Discord; для текстов из интернета, голосовой модели и обложек в Discord — интернет (только после вашего разрешения в настройках).
 
 ## Что NOVA отправляет в интернет
 
 Только по вашему разрешению: поиск текстов песен (LRCLIB), загрузку голосовой модели (Hugging Face), обложки для статуса Discord (каталоги Apple и Deezer: исполнитель и название), проверку обновлений (этот репозиторий). Обложки, визуалы, уведомления, голос и настройки остаются на компьютере.
 
-Лицензии сторонних компонентов — `THIRD-PARTY-NOTICES.txt` в каждом релизе.
+Лицензии сторонних компонентов — `THIRD-PARTY-NOTICES.txt` и папка `licenses` в каждом релизе.
