@@ -547,11 +547,11 @@ footer .name { font-family: var(--display); font-weight: 700; font-stretch: 75%;
             <div class="body"><div class="file"><span class="ico"></span><span><b>NovaIsland-1.6.0-Setup.zip</b><small class="dl-size">70 MB · <span data-l="en">Done</span><span data-l="ru" lang="ru">Готово</span></small></span><span class="open"><span data-l="en">Open file</span><span data-l="ru" lang="ru">Открыть</span></span></div><div class="done"></div></div></div>
         </div>
         <div class="stage" data-s="1" data-ui>
-          <div class="win"><div class="head">NovaIsland-1.6.0</div>
+          <div class="win"><div class="head vtext">NovaIsland-1.6.0</div>
             <div class="body" style="padding:6px 0"><table class="list">
               <tr class="hi"><td>Install.cmd</td><td>Windows Batch</td></tr>
               <tr><td>Install.ps1</td><td>PowerShell</td></tr>
-              <tr><td>NovaIsland-1.6.0-x64.msix</td><td>MSIX</td></tr>
+              <tr><td class="vtext">NovaIsland-1.6.0-x64.msix</td><td>MSIX</td></tr>
               <tr><td>NovaIsland.cer</td><td><span data-l="en">Certificate</span><span data-l="ru" lang="ru">Сертификат</span></td></tr>
               <tr><td>RELEASE-NOTES.md</td><td>Markdown</td></tr>
               <tr><td>THIRD-PARTY-NOTICES.txt</td><td><span data-l="en">Text</span><span data-l="ru" lang="ru">Текст</span></td></tr>
@@ -628,8 +628,8 @@ footer .name { font-family: var(--display); font-weight: 700; font-stretch: 75%;
           <div class="a"><p><span data-l="en">NOVA tells you when a new version is out. Click Settings → About → Updates → Download and install, then confirm in the Windows installer window that opens.</span><span data-l="ru" lang="ru">NOVA сама скажет о новой версии. Нажмите «Настройки → О программе → Обновления → Скачать и установить» и подтвердите установку в открывшемся окне Windows.</span></p></div>
         </details>
         <details data-reveal style="--d:180ms">
-          <summary><span data-l="en">The voice assistant does not start</span><span data-l="ru" lang="ru">Не запускается голосовой ассистент</span></summary>
-          <div class="a"><p><span data-l="en">Install the</span><span data-l="ru" lang="ru">Установите</span> <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe">Microsoft Visual C++ Redistributable (x64)</a> <span data-l="en">from Microsoft; many PCs already have it. Voice also needs its model, which downloads by itself while voice is on.</span><span data-l="ru" lang="ru">с сайта Microsoft; на многих ПК он уже есть. Ещё голосу нужна модель: она скачивается сама, пока голос включён.</span></p></div>
+          <summary><span data-l="en">How does the voice assistant work?</span><span data-l="ru" lang="ru">Как работает голосовой ассистент?</span></summary>
+          <div class="a"><p><span data-l="en">Hold the voice shortcut (Ctrl+Alt+V unless that combination is taken on your PC) and speak, in Russian or English. Speech is recognized on your PC by whisper.cpp; the microphone opens only while the island is listening. Its model (~57 MB) downloads once, by itself, while voice is on.</span><span data-l="ru" lang="ru">Держите сочетание голоса (Ctrl+Alt+V, если оно свободно на вашем ПК) и говорите по-русски или по-английски. Речь распознаётся на вашем ПК с помощью whisper.cpp, микрофон включается, только пока остров слушает. Модель (~57 МБ) скачивается один раз сама, пока голос включён.</span></p></div>
         </details>
         <details data-reveal style="--d:180ms">
           <summary><span data-l="en">What doesn't it do?</span><span data-l="ru" lang="ru">Чего он не умеет?</span></summary>
@@ -951,6 +951,7 @@ footer .name { font-family: var(--display); font-weight: 700; font-stretch: 75%;
       var v = String(release.tag_name || '').replace(/^v/, '').replace(/[^0-9A-Za-z.\-]/g, '');
       $$('.ver').forEach(function (el) { var ru = el.parentNode.getAttribute('data-l') === 'ru'; el.textContent = ' · v' + v + (zipMb ? ' · ' + zipMb + (ru ? ' МБ' : ' MB') : ''); });
       $$('.stage .file b').forEach(function (el) { el.textContent = zipName; });
+      if (/^\d+\.\d+\.\d+$/.test(v)) { $$('.vtext').forEach(function (el) { el.textContent = el.textContent.replace(/\d+\.\d+\.\d+/, v); }); }
       if (dock.classList.contains('is-download')) { dock.href = downloadUrl; $('.line', dock).firstElementChild.textContent = dlLabel(); }
     })
     .catch(function () {});
