@@ -10,8 +10,8 @@
   var l = new URLSearchParams(location.search).get('lang');
   if (l !== 'ru' && l !== 'en') { try { l = localStorage.getItem('nova-lang'); } catch (e) { l = null; } }
   if (l !== 'ru' && l !== 'en') { l = (navigator.language || '').toLowerCase().indexOf('ru') === 0 ? 'ru' : 'en'; }
-  document.documentElement.setAttribute('data-lang', l);
-  document.documentElement.setAttribute('lang', l);
+  var r = document.documentElement;
+  r.setAttribute('data-lang', l); r.setAttribute('lang', l); r.classList.add('js');
 })();
 </script>
 <meta name="description" content="Free Dynamic Island–style capsule for Windows 11: a player for any app, synced lyrics, GIF backgrounds, notifications, offline voice. Бесплатный остров в стиле Dynamic Island («динамический остров») для Windows 11: плеер, текст песни, гифки, уведомления.">
@@ -22,396 +22,940 @@
 <meta property="og:image" content="https://zawkyq.github.io/nova-island-releases/assets/social.png">
 <meta property="og:url" content="https://zawkyq.github.io/nova-island-releases/">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1a2039">
 <meta name="color-scheme" content="dark">
 <style>
 :root {
-  --bg: #090a16; --panel: rgba(255,255,255,.045); --line: rgba(255,255,255,.09);
-  --text: #f2f1fb; --muted: #a9a8c4; --dim: #7d7c99;
-  --accent: #8b6cff; --accent2: #4fa3ff; --radius: 22px;
+  --bg: #1a2039;
+  --surface: #212846;
+  --deep: #141a30;
+  --ink: #f9a3c0;
+  --muted: #c495aa;
+  --accent: #f9a3c0;
+  --accent-ink: #1a2039;
+  --display: "Bahnschrift", "Avenir Next Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+  --text: "Bahnschrift", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --ui: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --step-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2.75rem, 1.4rem + 5vw, 6rem);
+  --m: clamp(18px, 2.4vw, 36px);
+  --gap: clamp(12px, 1.6vw, 24px);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  --t-press: 140ms; --t-hover: 180ms; --t-ui: 240ms;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html { -webkit-text-size-adjust: 100%; }
 html[data-lang="en"] [data-l="ru"], html[data-lang="ru"] [data-l="en"] { display: none !important; }
-body {
-  margin: 0; color: var(--text); background: var(--bg);
-  font: 16px/1.6 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-body::before {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(60vw 50vh at 12% 95%, rgba(124,58,237,.35), transparent 70%),
-    radial-gradient(50vw 45vh at 90% 80%, rgba(37,140,235,.28), transparent 70%),
-    radial-gradient(45vw 40vh at 55% 120%, rgba(225,70,170,.22), transparent 70%),
-    radial-gradient(40vw 35vh at 95% 0%, rgba(30,80,160,.25), transparent 70%);
-}
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 var(--step-body)/1.5 var(--text); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+img, video { display: block; max-width: 100%; height: auto; }
 a { color: inherit; }
-.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
-header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(16px) saturate(160%); background: rgba(9,10,22,.6); border-bottom: 1px solid var(--line); }
-header .wrap { display: flex; align-items: center; gap: 20px; height: 60px; }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 650; text-decoration: none; letter-spacing: -.01em; }
-.brand img { width: 30px; height: 30px; }
-nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
-nav a { text-decoration: none; color: var(--muted); }
-nav a:hover { color: var(--text); }
-.lang { border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
-.lang:hover { background: rgba(255,255,255,.09); }
-:focus-visible { outline: 2px solid var(--accent2); outline-offset: 3px; border-radius: 8px; }
-section, #top { scroll-margin-top: 76px; }
+::selection { background: var(--ink); color: var(--bg); }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.display { font-family: var(--display); font-weight: 700; font-stretch: 75%; text-transform: uppercase; letter-spacing: -0.01em; line-height: 0.86; margin: 0; }
+h2.display { font-size: var(--step-head); }
+.h3 { margin: 0; font: 700 clamp(1.75rem, 1rem + 2.2vw, 2.75rem)/0.95 var(--display); font-stretch: 75%; text-transform: uppercase; }
+p { margin: 0; }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); padding-inline: var(--m); }
 
-.hero { padding: 72px 0 40px; display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
-h1 { font-size: clamp(2.2rem, 4.6vw, 3.6rem); line-height: 1.05; letter-spacing: -.025em; margin: 0 0 18px; font-weight: 750; }
-h1 .grad { background: linear-gradient(90deg, #a78bfa, #60a5fa 60%, #f472b6); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.nowrap { white-space: nowrap; }
-.lead { font-size: 1.15rem; color: var(--muted); margin: 0 0 30px; max-width: 34em; }
-.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; }
-.btn {
-  display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 650; font-size: 1.05rem;
-  padding: 15px 26px; border-radius: 999px; color: #fff;
-  background: linear-gradient(135deg, #7c5cff, #4f8dff); box-shadow: 0 10px 30px -10px rgba(124,92,255,.8), inset 0 1px 0 rgba(255,255,255,.25);
-  transition: transform .12s ease, box-shadow .2s ease;
+/* Buttons: one shape, the capsule's. */
+.btn { display: inline-flex; align-items: center; gap: 0.6em; padding: 0.95em 1.6em; border-radius: 999px; border: 0; background: var(--accent); color: var(--accent-ink);
+  font: 600 var(--step-body)/1 var(--text); text-decoration: none; cursor: pointer; transition: transform var(--t-press) var(--ease-out), background-color var(--t-hover) ease, color var(--t-hover) ease; }
+.btn:active { transform: scale(0.97); }
+.btn svg { width: 1.1em; height: 1.1em; flex: none; }
+.btn.small { padding: 0.7em 1.2em; font-size: var(--step-small); }
+.btn.dark { background: var(--bg); color: var(--ink); }
+.link { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 0.22em; text-decoration-thickness: 0.07em; transition: text-decoration-color var(--t-hover) ease; }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { background: #ffc2d6; }
+  .btn.dark:hover { background: #0f1426; }
+  .link:hover { text-decoration-color: currentColor; }
 }
-.btn:hover { box-shadow: 0 14px 36px -10px rgba(124,92,255,.95), inset 0 1px 0 rgba(255,255,255,.25); }
-.btn:active { transform: scale(.97); }
-.btn svg { width: 20px; height: 20px; }
-.meta { font-size: 13.5px; color: var(--dim); }
-.link { color: var(--muted); font-size: 14.5px; }
 
-.shot { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: #0d0e1d; box-shadow: 0 30px 80px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.3); }
-.shot video, .shot img { display: block; width: 100%; height: auto; }
-.play { position: absolute; right: 12px; bottom: 12px; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18);
-  background: rgba(10,10,24,.65); color: #fff; display: grid; place-items: center; cursor: pointer; backdrop-filter: blur(8px); }
-.play svg { width: 14px; height: 14px; }
-.play:hover { background: rgba(30,30,60,.8); }
+/* Bar: wordmark, three links, the action. The centre is where the island docks. */
+.bar { position: sticky; top: 0; z-index: 30; height: 64px; background: var(--bg); display: flex; align-items: center; gap: 28px; padding-inline: var(--m); }
+.mark { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 1.125rem/1 var(--display); font-stretch: 75%; text-transform: uppercase; letter-spacing: 0.01em; }
+.mark img { width: 28px; height: 28px; }
+.bar nav { margin-left: auto; display: flex; gap: 24px; font-size: var(--step-small); }
+.bar nav a { text-decoration: none; }
+.lang { background: var(--surface); color: var(--ink); border: 0; border-radius: 999px; padding: 8px 14px; font: 600 var(--step-small)/1 var(--text); cursor: pointer; transition: background-color var(--t-hover) ease, transform var(--t-press) var(--ease-out); }
+.lang:active { transform: scale(0.96); }
+@media (hover: hover) and (pointer: fine) { .lang:hover { background: #2b3358; } }
 
-section { padding: 56px 0; }
-h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -.02em; line-height: 1.15; margin: 0 0 10px; }
-.sub { color: var(--muted); margin: 0 0 34px; max-width: 42em; }
-.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
-.card img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--line); }
-.card .body { padding: 18px 22px 22px; }
-.card h3 { margin: 0 0 6px; font-size: 1.1rem; letter-spacing: -.01em; }
-.card p { margin: 0; color: var(--muted); font-size: 15px; }
-.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 22px; }
-.chip { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; font-size: 14.5px; color: var(--muted); }
-.chip b { display: block; color: var(--text); font-size: 15px; margin-bottom: 2px; }
+/* The island itself (HTML replica of NOVA's compact capsule and player, built from the real screenshots). */
+[data-ui] { font-family: var(--ui); text-transform: none; letter-spacing: 0; line-height: 1.25; color: #fff; }
+.cap { --cap-accent: #9b7bff; position: relative; display: flex; align-items: center; gap: 0.32em; background: #000; border-radius: 999px; color: #fff; overflow: hidden; }
+.cap .cover { flex: none; border-radius: 22%; background: var(--cover, #6d43c9); }
+.cap .line { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.cap .line span { display: inline-block; transition: opacity 260ms ease, transform 360ms var(--ease-out); }
+.cap .line span.out { opacity: 0; transform: translateY(-40%); }
+.bars { flex: none; display: flex; align-items: center; gap: 12%; height: 46%; aspect-ratio: 1.2; }
+.bars i { flex: 1; height: 100%; border-radius: 9px; background: var(--cap-accent); transform-origin: 50% 50%; transform: scaleY(0.3); }
 
-.steps { counter-reset: s; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 0 0 18px; padding: 0; list-style: none; }
-.steps li { counter-increment: s; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; color: var(--muted); font-size: 15px; }
-.steps li::before { content: counter(s); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; margin-bottom: 12px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #7c5cff, #4f8dff); }
-.steps b { color: var(--text); }
-.steps.flash li { animation: flash 1.2s ease 2; }
-@keyframes flash { 50% { border-color: rgba(139,108,255,.8); box-shadow: 0 0 0 4px rgba(139,108,255,.18); } }
-@media (prefers-reduced-motion: reduce) { .steps.flash li { animation: none; border-color: rgba(139,108,255,.8); } }
-.note { color: var(--muted); font-size: 15px; margin: 0 0 12px; }
-.note b { color: var(--text); }
-.notes { margin: 0 0 26px; }
-details { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 4px 20px; margin-bottom: 12px; }
-summary { cursor: pointer; font-weight: 600; padding: 14px 0; list-style: none; display: flex; align-items: center; gap: 10px; }
-summary::-webkit-details-marker { display: none; }
-summary::before { content: ""; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .15s ease; flex: none; }
-details[open] summary::before { transform: rotate(45deg); }
-details[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 10px; }
-details p, details ul { color: var(--muted); font-size: 15px; }
-code { font-family: "Cascadia Code", Consolas, monospace; font-size: .88em; background: rgba(255,255,255,.07); padding: 2px 6px; border-radius: 6px; white-space: nowrap; }
-code.any { white-space: normal; overflow-wrap: anywhere; }
-pre { background: rgba(0,0,0,.35); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; overflow-x: auto; }
-pre code { background: none; padding: 0; }
+/* Hero: the sentence is the layout; the capsule stands where a word would be. */
+.hero { min-height: calc(100svh - 64px); display: flex; flex-direction: column; justify-content: center; padding: 4svh var(--m) 7svh; }
+.sentence { font-size: clamp(2.4rem, 11.2vw, 13.5rem); }
+.sentence .ln { display: block; white-space: nowrap; }
+.slot { display: inline-block; vertical-align: baseline; width: 2.9em; height: 0.7em; margin: 0 0.06em; position: relative; cursor: pointer; border: 0; padding: 0; background: none; font: inherit; color: inherit; }
+.slot .cap { position: absolute; inset: 0; font-family: var(--ui); font-stretch: 100%; line-height: 1.3; font-size: 0.17em; padding: 0 1em 0 0.6em; gap: 0.6em; will-change: transform; }
+.slot .cap .cover { width: 2.6em; height: 2.6em; border-radius: 0.6em; }
+.slot .cap .line { font-size: 0.84em; }
+.slot .cap .bars { width: 2.3em; }
+.slot:focus-visible { outline: none; }
+.slot:focus-visible .cap { outline: 4px solid var(--ink); outline-offset: 6px; }
+.lede { max-width: 40ch; font-size: var(--step-lead); line-height: 1.4; margin-top: clamp(28px, 4vh, 44px); }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 30px; }
+.meta { font-size: var(--step-small); color: var(--muted); }
 
-table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
-th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { color: var(--dim); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
-td { color: var(--muted); }
-td:first-child { color: var(--text); }
-.tablebox { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 10px; overflow-x: auto; }
-.never { margin-top: 18px; color: var(--muted); font-size: 15px; }
-.never b { color: var(--text); }
+/* The open player under the hero capsule. */
+.pop { position: absolute; z-index: 25; left: 50%; top: 0; display: none; width: min(92vw, 560px); transform-origin: 50% 0; translate: -50% 0; pointer-events: none; opacity: 0; }
+.pop.open, .pop.closing { display: block; }
+.pop.open { pointer-events: auto; }
 
-footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 30px 0 50px; color: var(--dim); font-size: 13.5px; }
-footer .row { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-bottom: 12px; }
-footer a { color: var(--muted); }
+.player { background: #050507; border-radius: 34px; padding: 22px 24px 18px; color: #fff; }
+.player .top { display: grid; grid-template-columns: 96px 1fr auto; gap: 18px; align-items: start; }
+.player .cover { width: 96px; height: 96px; border-radius: 16px; background: var(--cover, #6d43c9); }
+.player .title { font-size: 18px; font-weight: 600; margin-top: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player .artist { font-size: 14px; color: #b9b9c4; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player .chip { display: inline-block; margin-top: 8px; font-size: 11.5px; color: #c9c9d3; background: #24242b; border-radius: 999px; padding: 3px 9px; }
+.player .bars { height: 22px; width: 28px; margin-top: 4px; }
+.player .lyric { font-size: 14px; color: #e5e5ee; margin: 14px 0 8px; min-height: 1.3em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player .seek { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; font-size: 11.5px; color: #9d9daa; font-variant-numeric: tabular-nums; }
+.player .track { height: 4px; border-radius: 4px; background: #3a3a44; position: relative; overflow: hidden; }
+.player .track b { position: absolute; inset: 0 auto 0 0; width: 8%; background: var(--cap-accent); border-radius: 4px; }
+.player .controls { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; color: #f2f2f6; }
+.player .controls span { display: flex; gap: 22px; align-items: center; }
+.player .controls svg { width: 18px; height: 18px; }
+.player .controls .big svg { width: 26px; height: 26px; }
+.player .controls .dim { color: #9d9daa; }
+.player button { background: none; border: 0; color: inherit; padding: 0; cursor: pointer; display: grid; place-items: center; }
 
-@media (max-width: 860px) {
-  .hero { grid-template-columns: 1fr; padding-top: 44px; gap: 32px; }
-  .grid, .steps { grid-template-columns: 1fr; }
-  .chips { grid-template-columns: 1fr 1fr; }
-  nav { display: none; }
-  .lang { margin-left: auto; }
+/* Docked capsule: when the hero leaves, the island moves to the top of the window, like on Windows. */
+.dock { position: fixed; z-index: 40; top: 10px; left: 50%; width: 300px; height: 44px; translate: -50% 0; opacity: 0; pointer-events: none; text-decoration: none; display: none; }
+.dock.shown { display: block; }
+.dock .cap { position: absolute; inset: 0; font-size: 14px; padding: 0 14px 0 8px; gap: 10px; }
+.dock .cover { width: 30px; height: 30px; border-radius: 8px; }
+.dock .bars { width: 24px; height: 18px; }
+.dock .dl { display: none; color: var(--cap-accent); }
+.dock.is-download .bars { display: none; }
+.dock.is-download .dl { display: grid; place-items: center; width: 22px; height: 22px; }
+.dock.is-download .cover { background: var(--ink); display: grid; place-items: center; }
+
+section { position: relative; }
+.sect { padding-block: clamp(110px, 14vw, 200px); }
+
+/* Watch it open: statement left, the real recording right. */
+.reel .text { grid-column: 1 / span 4; align-self: center; }
+.reel .text p { margin-top: 26px; max-width: 36ch; }
+.reel figure { grid-column: 5 / span 8; margin: 0; position: relative; }
+.frame { overflow: hidden; }
+.reel figure .panel { background: var(--surface); }
+.frame video, .frame img { width: 100%; }
+.shutter { overflow: hidden; }
+.pausebtn { position: absolute; right: 14px; top: 14px; width: 44px; height: 44px; border-radius: 999px; border: 0; background: var(--bg); color: var(--ink); display: grid; place-items: center; cursor: pointer; transition: transform var(--t-press) var(--ease-out); }
+.pausebtn:active { transform: scale(0.94); }
+.pausebtn svg { width: 16px; height: 16px; }
+.reel figcaption { margin-top: 14px; font-size: var(--step-small); color: var(--muted); }
+
+/* Type your song: the line is an input, NOVA's answer below at true size. */
+.try { min-height: 88svh; display: flex; flex-direction: column; justify-content: center; padding-inline: var(--m); }
+.typeline { display: flex; align-items: center; gap: 0.08em; font-size: var(--step-head); }
+.typeline input { flex: 1; min-width: 0; width: 100%; background: none; border: 0; padding: 0; margin: 0; color: var(--ink); font: inherit; caret-color: var(--ink); text-transform: uppercase; letter-spacing: inherit; outline: none; }
+.typeline:focus-within { outline: 3px solid var(--ink); outline-offset: 10px; }
+.trydesc { margin-top: 18px; color: var(--muted); }
+.answer { margin-top: 44px; display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 40px; align-items: start; }
+.answer .capwrap { width: min(100%, 540px); height: 47px; position: relative; }
+.answer .capwrap .cap { position: absolute; inset: 0; font-size: 15px; padding: 0 16px 0 9px; gap: 12px; }
+.answer .capwrap .cover { width: 31px; height: 31px; border-radius: 8px; }
+.answer .capwrap .bars { width: 26px; height: 20px; }
+.answer .player { margin-top: 26px; max-width: 560px; }
+.examples { display: flex; flex-direction: column; gap: 12px; align-self: end; }
+.examples p { color: var(--muted); font-size: var(--step-small); }
+.examples button { background: none; border: 0; padding: 0; color: var(--ink); font: 400 var(--step-body)/1.3 var(--text); text-align: left; cursor: pointer; }
+
+/* It plays along: one axis at column 5, pictures on the right margin at unequal sizes. */
+.feat-head { min-height: 34svh; display: flex; align-items: center; }
+.feat-head h2 { grid-column: 5 / span 8; }
+.row { align-items: start; margin-top: clamp(80px, 9vw, 120px); }
+.row .txt { grid-column: 5 / span 4; }
+.row p { margin-top: 16px; max-width: 34ch; }
+.row .pic { grid-column: 9 / span 4; justify-self: end; background: var(--surface); }
+.row .pic.w1 { width: 100%; }
+.row .pic.w2 { width: 78%; }
+.row .pic.w3 { width: 90%; }
+.also { margin-top: clamp(80px, 9vw, 120px); }
+.also p { grid-column: 5 / span 6; font-size: var(--step-lead); line-height: 1.35; max-width: 42ch; }
+
+/* Nine themes: a pink field, the words, real screenshots dropped on them like prints. */
+.themes { background: var(--ink); color: var(--bg); overflow: hidden; padding: clamp(80px, 9vw, 140px) var(--m) 0; }
+.themes h2 { font-size: clamp(5rem, 1rem + 13vw, 15rem); line-height: 0.84; text-align: center; color: var(--bg); }
+.table { position: relative; height: clamp(300px, 34vw, 560px); margin-top: clamp(36px, 4vw, 64px); }
+.print { position: absolute; width: clamp(220px, 30vw, 500px); background: var(--surface); transition: transform 220ms var(--ease-out); cursor: zoom-in; }
+.print img { width: 100%; }
+.print.a { left: 2%; top: 14%; transform: rotate(-8deg); z-index: 2; }
+.print.b { left: 24%; top: 0; transform: rotate(5deg); z-index: 3; }
+.print.c { left: 46%; top: 18%; transform: rotate(-4deg); z-index: 4; }
+.print.d { left: 68%; top: 4%; transform: rotate(7deg); z-index: 3; }
+.print:focus-visible { outline: 4px solid var(--bg); }
+@media (hover: hover) and (pointer: fine) { .print:hover { transform: rotate(0) scale(1.03); z-index: 5; } }
+.print:focus { transform: rotate(0) scale(1.03); z-index: 5; }
+.themes .note { max-width: 52ch; margin: 0 auto; padding: 0 0 clamp(40px, 5vw, 64px); font-size: var(--step-body); font-weight: 500; text-align: center; }
+
+/* Install: drag through the stages. */
+.install { display: grid; grid-template-columns: 1fr 1fr; min-height: 88svh; }
+.install .left { background: var(--surface); padding: clamp(48px, 7vw, 96px) var(--m) 150px; display: flex; flex-direction: column; gap: 26px; }
+.install .right { background: var(--deep); display: grid; place-items: center; padding: 48px var(--m) 150px; }
+.install h2 { min-height: 1.72em; }
+.install .say { max-width: 40ch; min-height: 7.5em; }
+.stagebox { width: min(100%, 560px); position: relative; }
+.stage { display: none; }
+.stage.on { display: block; animation: fadein 220ms ease; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+.slide { position: absolute; left: var(--m); right: var(--m); bottom: 34px; }
+.rail { position: relative; height: 32px; }
+.rail::before { content: ""; position: absolute; left: 0; right: 0; top: 12px; height: 8px; background: #3a4268; }
+.rail .fill { position: absolute; left: 0; top: 12px; height: 8px; width: var(--p, 0%); background: var(--ink); }
+.slide input { -webkit-appearance: none; appearance: none; position: absolute; inset: 0; width: 100%; height: 32px; background: transparent; margin: 0; cursor: pointer; }
+.slide input::-webkit-slider-runnable-track { height: 8px; background: transparent; }
+.slide input::-moz-range-track { height: 8px; background: transparent; }
+.slide input::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; margin-top: -12px; background: var(--ink); border: 0; border-radius: 0; }
+.slide input::-moz-range-thumb { width: 32px; height: 32px; background: var(--ink); border: 0; border-radius: 0; }
+.slide input:focus-visible { outline: 3px solid var(--ink); outline-offset: 6px; }
+.names { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 12px; font-size: var(--step-small); color: var(--muted); }
+.names button { background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.names button:nth-child(4) { text-align: right; }
+.names button:nth-child(3) { text-align: center; }
+.names button:nth-child(2) { text-align: center; }
+.names button.on { color: var(--ink); font-weight: 600; }
+
+/* Windows-like fragments, schematic, for the install stages. */
+.win { background: #202020; color: #fff; border-radius: 8px; font-family: var(--ui); font-size: 16px; overflow: hidden; }
+.win .head { background: #2b2b2b; padding: 10px 14px; font-size: 12.5px; color: #cfcfcf; }
+.win .body { padding: 14px; }
+.file { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center; }
+.file .ico { width: 34px; height: 40px; background: #f2c14e; border-radius: 3px; position: relative; }
+.file .ico::after { content: ""; position: absolute; left: 13px; top: 0; width: 8px; height: 22px; background: #8a6614; }
+.file b { display: block; font-weight: 600; }
+.file small { color: #a9a9a9; font-size: 12.5px; }
+.file .open { background: #3a3a3a; border-radius: 4px; padding: 6px 12px; font-size: 13px; }
+.done { margin-top: 12px; height: 4px; border-radius: 2px; background: #4cc2ff; }
+.list { width: 100%; border-collapse: collapse; font-size: 15.5px; }
+.list td { padding: 9px 14px; border-bottom: 1px solid #2f2f2f; white-space: nowrap; }
+.list td:last-child { color: #a9a9a9; text-align: right; }
+.list tr.hi td { background: #0d3a5c; color: #fff; }
+.uac { background: #1f1f1f; border-radius: 8px; overflow: hidden; font-family: var(--ui); color: #fff; }
+.uac .band { background: #2c4766; padding: 16px 18px; font-size: 13px; }
+.uac .q { padding: 20px 22px 8px; font-size: 21px; line-height: 1.3; }
+.uac .who { padding: 10px 22px 20px; font-size: 15px; color: #c9c9c9; }
+.uac .who b { display: block; color: #fff; font-size: 17px; margin-bottom: 4px; }
+.uac .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 18px 18px; }
+.uac .btns span { text-align: center; padding: 10px; border-radius: 4px; background: #333; font-size: 16px; }
+.uac .btns span.yes { background: #4cc2ff; color: #000; }
+.dive { background: var(--surface); }
+.dive video { width: 100%; }
+.dive p { padding: 12px 14px; font-family: var(--ui); font-size: 13.5px; color: #dcdcea; }
+.replay { margin-top: 12px; background: var(--surface); color: var(--ink); border: 0; border-radius: 999px; padding: 8px 14px; font: 600 var(--step-small)/1 var(--text); cursor: pointer; }
+
+/* What leaves your PC: statement, table pushed right. */
+.priv-head h2 { grid-column: 1 / -1; }
+.priv-head h2 .indent { padding-left: 3vw; }
+.priv-body { margin-top: 96px; align-items: start; }
+.never { grid-column: 1 / span 5; align-self: start; }
+.never h3 { margin-bottom: 14px; }
+.never ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.never li { max-width: 38ch; }
+.never li b { font-weight: 600; }
+.sends { grid-column: 7 / span 6; }
+.sends .r { display: grid; grid-template-columns: 1.05fr 1fr 1.25fr; gap: 14px; padding-block: 13px; }
+.sends .r + .r { margin-top: 0; }
+.sends .r.gap { margin-top: 30px; }
+.sends .k { color: var(--muted); }
+.sends .w { font-weight: 600; }
+.sends .t { text-align: right; }
+.sends .t small { display: block; color: var(--muted); font-size: var(--step-small); }
+.fine { grid-column: 7 / span 6; margin-top: 40px; font-size: var(--step-small); color: var(--muted); max-width: 64ch; }
+.fine a { color: var(--ink); }
+
+/* Questions: wide heading, questions indented. */
+.faq h2 { grid-column: 1 / -1; }
+.qs { grid-column: 5 / span 8; margin-top: 80px; }
+.qs details { margin-bottom: 14px; border-radius: 0; transition: background-color var(--t-ui) ease; }
+.qs details[open] { background: var(--surface); }
+.qs summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 18px 24px; font-size: var(--step-lead); }
+.qs summary::-webkit-details-marker { display: none; }
+.qs summary::after { content: ""; flex: none; width: 12px; height: 12px; border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink); transform: rotate(45deg) translate(-3px, -3px); transition: transform var(--t-ui) var(--ease-out); }
+.qs details[open] summary::after { transform: rotate(225deg) translate(-3px, -3px); }
+.qs .a { padding: 0 24px 24px; max-width: calc(48ch + 48px); }
+.qs .a p + p { margin-top: 12px; }
+.qs code, .a code { font-family: inherit; font-weight: 600; overflow-wrap: anywhere; }
+
+/* Footer: invitation over the cropped name. */
+footer { background: var(--ink); color: var(--bg); min-height: 100svh; overflow: hidden; position: relative; padding-top: clamp(64px, 9vw, 120px); display: flex; flex-direction: column; }
+footer .top { align-items: start; }
+footer .inv { grid-column: 1 / span 7; }
+footer .inv h2 { margin-bottom: 34px; }
+footer .links { grid-column: 10 / span 3; display: flex; flex-direction: column; gap: 10px; }
+footer .links a { text-decoration: none; font-weight: 500; }
+footer .legal { margin-top: auto; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding: 0 var(--m) 14px; font-size: var(--step-small); }
+footer .legal span { max-width: 70ch; }
+footer .name { font-family: var(--display); font-weight: 700; font-stretch: 75%; text-transform: uppercase; font-size: clamp(7rem, 2rem + 27vw, 30rem); line-height: 0.8; white-space: nowrap; padding-left: calc(var(--m) - 0.04em); transform: translateY(26%); margin-bottom: -0.1em; }
+
+/* Entrances (content stays visible without script). */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] { opacity: 0; transform: translateY(26px); transition: opacity 420ms var(--ease-out), transform 900ms var(--ease-expo); transition-delay: var(--d, 0ms); }
+  .js [data-reveal].is-in { opacity: 1; transform: none; }
+  .js .shutter { clip-path: inset(0 0 100% 0); transition: clip-path 1000ms var(--ease-in-out); }
+  .js .shutter video, .js .shutter img { transform: scale(1.12); transition: transform 1500ms var(--ease-soft); }
+  .js .shutter.is-in { clip-path: inset(0); }
+  .js .shutter.is-in video, .js .shutter.is-in img { transform: none; }
+  .js .sentence .word { display: inline-block; opacity: 0; transform: translateY(0.18em); animation: rise 900ms var(--ease-expo) forwards; animation-delay: var(--d, 0ms); }
+  @keyframes rise { to { opacity: 1; transform: none; } }
 }
-@media (max-width: 520px) { .chips { grid-template-columns: 1fr; } }
-@media (max-width: 640px) {
-  .tablebox { padding: 4px 16px; }
-  table, tbody, tr, td { display: block; }
-  thead { display: none; }
-  tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
-  tr:last-child { border-bottom: 0; }
-  td { border: 0; padding: 2px 0; }
-  td:first-child { font-weight: 600; margin-bottom: 4px; }
-  td:nth-child(2)::before { content: "→ "; color: var(--dim); }
-  td:nth-child(3) { font-size: 13.5px; color: var(--dim); }
-  td:nth-child(4)::before { content: "⚙ "; color: var(--dim); }
+
+@media (max-width: 900px) {
+  .bar nav { display: none; }
+  .bar { gap: 12px; }
+  .bar .btn { display: none; }
+  .mark .wt { display: none; }
+  .bar .lang { margin-left: auto; }
+  .reel .text, .reel figure { grid-column: 1 / -1; }
+  .reel figure { margin-top: 40px; }
+  .answer { grid-template-columns: 1fr; }
+  .examples { flex-direction: row; flex-wrap: wrap; align-self: start; }
+  .examples p { width: 100%; }
+  .examples button { background: var(--surface); border-radius: 999px; padding: 12px 16px; min-height: 44px; font-size: var(--step-small); }
+  .feat-head { min-height: 40svh; }
+  .feat-head h2, .row .txt, .also p { grid-column: 1 / -1; }
+  .row .pic { grid-column: 1 / -1; margin-top: 26px; justify-self: start; }
+  .row .pic.w1 { width: 100%; } .row .pic.w2 { width: 72%; justify-self: end; } .row .pic.w3 { width: 86%; }
+  .install { grid-template-columns: 1fr; }
+  .install .right { order: 1; padding: 40px var(--m) 28px; }
+  .slide { order: 2; position: relative; left: auto; right: auto; bottom: auto; padding: 18px var(--m) 22px; background: var(--deep); }
+  .install .left { order: 3; padding: 48px var(--m) 56px; }
+  .priv-body { margin-top: 56px; }
+  .never, .sends { grid-column: 1 / -1; }
+  .never { order: 2; margin-top: 56px; }
+  .fine { grid-column: 1 / -1; order: 3; }
+  .qs { grid-column: 1 / -1; margin-top: 48px; }
+  .qs summary { padding: 16px 18px; }
+  .qs .a { padding: 0 18px 20px; }
+  footer .inv, footer .links { grid-column: 1 / -1; }
+  footer .links { flex-direction: row; flex-wrap: wrap; gap: 8px 18px; margin-top: 28px; }
+  .table { height: 74vw; }
+  .print { width: 62vw; }
+  .print.a { left: -4%; top: 6%; } .print.b { left: 36%; top: 0; } .print.c { left: 2%; top: 38%; } .print.d { left: 40%; top: 44%; }
+}
+@media (max-width: 600px) {
+  .sentence .ln:first-child { display: flex; flex-wrap: wrap; column-gap: 0.22em; }
+  .sentence .ln:first-child .word:first-child { order: 1; }
+  .sentence .ln:first-child .word:last-child { order: 2; }
+  .slot { order: 3; flex-basis: 100%; width: 100%; height: 0.95em; margin: 0.14em 0 0.12em; }
+  .slot .cap { font-size: 0.235em; padding: 0 0.9em 0 0.55em; }
+  .slot .cap .line { font-size: 0.9em; }
+}
+@media (max-width: 560px) {
+  .sends .r { grid-template-columns: 1fr auto; row-gap: 2px; }
+  .sends .k { grid-column: 1 / -1; font-size: var(--step-small); }
+  .sends .t { grid-column: 2; grid-row: 2; }
+  .sends .w { grid-column: 1; grid-row: 2; }
+  .names { grid-template-columns: 1fr 1fr; row-gap: 6px; }
+  .names button:nth-child(n) { text-align: left; }
+  .dock { width: 210px; height: 38px; }
+  .dock .cap { font-size: 12.5px; }
+  .dock .cover { width: 26px; height: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage.on { animation: none; }
 }
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <a class="brand" href="#top"><img src="assets/logo.png" alt="" width="30" height="30">NOVA Island</a>
-    <nav aria-label="Sections">
-      <a href="#features"><span data-l="en">Features</span><span data-l="ru" lang="ru">Возможности</span></a>
-      <a href="#install"><span data-l="en">Install</span><span data-l="ru" lang="ru">Установка</span></a>
-      <a href="#privacy"><span data-l="en">Privacy</span><span data-l="ru" lang="ru">Приватность</span></a>
-      <a href="https://github.com/ZawkyQ/nova-island-releases">GitHub</a>
-    </nav>
-    <button class="lang" id="lang" type="button">RU</button>
-  </div>
+
+<header class="bar">
+  <a class="mark" href="#top" aria-label="NOVA Island"><img src="assets/logo.png" alt="" width="28" height="28"><span class="wt">NOVA Island</span></a>
+  <nav aria-label="Sections">
+    <a class="link" href="#features"><span data-l="en">Features</span><span data-l="ru" lang="ru">Возможности</span></a>
+    <a class="link" href="#install"><span data-l="en">Install</span><span data-l="ru" lang="ru">Установка</span></a>
+    <a class="link" href="#privacy"><span data-l="en">Privacy</span><span data-l="ru" lang="ru">Приватность</span></a>
+  </nav>
+  <button class="lang" id="lang" type="button">RU</button>
+  <a class="btn small dl-link" href="https://github.com/ZawkyQ/nova-island-releases/releases/latest"><span data-l="en">Download</span><span data-l="ru" lang="ru">Скачать</span></a>
 </header>
 
-<main id="top" class="wrap">
-  <div class="hero">
-    <div>
-      <h1>
-        <span data-l="en"><span class="nowrap">Dynamic Island–style</span> <span class="grad">capsule</span> for Windows&nbsp;11</span>
-        <span data-l="ru" lang="ru"><span class="grad">Остров</span> в стиле <span class="nowrap">Dynamic Island</span> для Windows&nbsp;11</span>
-      </h1>
-      <p class="lead">
-        <span data-l="en">Your music, synced lyrics, notifications and a system center live in a small capsule at the top of the screen and smoothly open up. Free, light, and it works with any player Windows sees.</span>
-        <span data-l="ru" lang="ru">Музыка, текст песни, уведомления и системный центр живут в маленькой капсуле сверху экрана и плавно раскрываются. Бесплатно, не грузит ПК и работает с любым плеером, который видит Windows.</span>
-      </p>
-      <div class="cta">
-        <a class="btn" id="download" href="https://github.com/ZawkyQ/nova-island-releases/releases/latest">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
-          <span data-l="en">Download for Windows 11</span><span data-l="ru" lang="ru">Скачать для Windows 11</span>
-        </a>
-        <a class="link" href="#install"><span data-l="en">How to install</span><span data-l="ru" lang="ru">Как установить</span></a>
-      </div>
-      <p class="meta">
-        <span data-l="en">Free · Windows 11 x64<span class="ver"></span> · English and Russian</span><span data-l="ru" lang="ru">Бесплатно · Windows 11 x64<span class="ver"></span> · русский и английский</span>
-      </p>
-    </div>
-    <div class="shot">
-      <video id="hero" src="assets/hero.mp4" poster="assets/poster.jpg" width="600" height="340" muted loop playsinline preload="auto"></video>
-      <button class="play" id="play" type="button"></button>
-    </div>
-  </div>
+<a class="dock" id="dock" href="#top" aria-label="NOVA Island" tabindex="-1" data-ui>
+  <span class="cap">
+    <span class="cover"><svg class="dl" viewBox="0 0 24 24" fill="none" stroke="#1a2039" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg></span>
+    <span class="line"><span class="lyric-text">City lights are humming low</span></span>
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  </span>
+</a>
 
-  <section id="features">
-    <h2><span data-l="en">Everything at the top of your screen</span><span data-l="ru" lang="ru">Всё — сверху экрана</span></h2>
-    <p class="sub"><span data-l="en">Real screenshots of NOVA Island. The track and the lyrics are made up for the demo.</span><span data-l="ru" lang="ru">Настоящие снимки NOVA Island. Трек и текст придуманы для показа.</span></p>
-    <div class="grid">
-      <div class="card">
-        <img src="assets/player.png" width="600" height="340" loading="lazy" alt="NOVA Island player · плеер NOVA Island">
-        <div class="body">
-          <h3><span data-l="en">A player for any app</span><span data-l="ru" lang="ru">Плеер для любого приложения</span></h3>
-          <p><span data-l="en">Spotify, Yandex Music, browsers and more. Drag to seek, shuffle and repeat (where the player supports them), the player's own volume (or the Windows volume if the player has no sound of its own), and an equalizer that follows the real sound.</span><span data-l="ru" lang="ru">Spotify, Яндекс Музыка, браузеры и другие. Перемотка перетаскиванием, перемешивание и повтор (если плеер их даёт), громкость самого плеера (или громкость Windows, если у плеера нет своего звука) и эквалайзер по настоящему звуку.</span></p>
-        </div>
-      </div>
-      <div class="card">
-        <img src="assets/lyrics.png" width="600" height="340" loading="lazy" alt="Synced lyrics · синхронный текст песни">
-        <div class="body">
-          <h3><span data-l="en">Synced lyrics</span><span data-l="ru" lang="ru">Синхронный текст песни</span></h3>
-          <p><span data-l="en">From your own .lrc files or LRCLIB. Lines move only by real timestamps, never guessed. A lyric line can sit right in the small capsule.</span><span data-l="ru" lang="ru">Из ваших файлов .lrc или с LRCLIB. Строки сменяются только по настоящим временным меткам, ничего не угадывается. Строку текста можно показывать прямо в маленькой капсуле.</span></p>
-        </div>
-      </div>
-      <div class="card">
-        <img src="assets/more.png" width="600" height="340" loading="lazy" alt="Sleep timer · таймер сна">
-        <div class="body">
-          <h3><span data-l="en">Sleep timer and more</span><span data-l="ru" lang="ru">Таймер сна и не только</span></h3>
-          <p><span data-l="en">Pause in 15, 30, 60 minutes or at the end of the track. Copy the title, find it on YouTube, switch between apps that are playing.</span><span data-l="ru" lang="ru">Пауза через 15, 30, 60 минут или в конце трека. Скопировать название, найти на YouTube, переключиться между играющими приложениями.</span></p>
-        </div>
-      </div>
-      <div class="card">
-        <img src="assets/system.png" width="600" height="340" loading="lazy" alt="System center · системный центр">
-        <div class="body">
-          <h3><span data-l="en">System center and notifications</span><span data-l="ru" lang="ru">Системный центр и уведомления</span></h3>
-          <p><span data-l="en">Windows notifications on the island, with quiet hours and flood protection. Notification text is never stored.</span><span data-l="ru" lang="ru">Уведомления Windows на острове, тихие часы и защита от потока уведомлений. Их текст нигде не сохраняется.</span></p>
+<main id="top">
+  <section class="hero" aria-labelledby="h1">
+    <h1 class="display sentence" id="h1">
+      <span class="ln"><span class="word" style="--d:120ms">NOVA</span> <button class="slot" id="slot" type="button" aria-expanded="false" aria-controls="pop" data-ui><span class="vh" data-l="en">The capsule: open the player</span><span class="vh" data-l="ru" lang="ru">Капсула: открыть плеер</span><span class="cap" id="heroCap" aria-hidden="true"><span class="cover"></span><span class="line"><span class="lyric-text">City lights are humming low</span></span><span class="bars"><i></i><i></i><i></i><i></i></span></span></button> <span class="word" style="--d:220ms">Island</span></span>
+      <span class="ln"><span class="word" style="--d:320ms" data-l="en">for Windows 11</span><span class="word" style="--d:320ms" data-l="ru" lang="ru">для Windows 11</span></span>
+    </h1>
+    <div style="position:relative">
+      <div class="pop" id="pop" data-ui>
+        <div class="player" data-player>
+          <div class="top">
+            <span class="cover"></span>
+            <div style="min-width:0">
+              <div class="title song-title">Midnight Static</div>
+              <div class="artist song-artist">Vera Nox</div>
+              <span class="chip song-source">Demo</span>
+            </div>
+            <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          </div>
+          <div class="lyric"><span class="lyric-text">City lights are humming low</span></div>
+          <div class="seek"><span class="pos">0:00</span><span class="track"><b></b></span><span class="left">−4:03</span></div>
+          <div class="controls">
+            <span class="dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="m4 16 5-5 4 4 3-3 4 4"/></svg></span>
+            <span><svg class="dim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 7h4l10 10h4M3 17h4l3-3m4-4 3-3h4m-3-3 3 3-3 3m0 4 3 3-3 3"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14l-10-7z"/></svg><button class="big playpause" type="button"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><span class="vh">Pause</span></button><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l10-7z"/></svg><svg class="dim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12V9a3 3 0 0 1 3-3h12m-3-3 3 3-3 3M20 12v3a3 3 0 0 1-3 3H5m3 3-3-3 3-3"/></svg></span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10zM16 9a4 4 0 0 1 0 6"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></span>
+          </div>
         </div>
       </div>
     </div>
-    <div class="chips">
-      <div class="chip"><b><span data-l="en">GIFs as background</span><span data-l="ru" lang="ru">Гифки фоном</span></b><span data-l="en">GIFs and videos behind the player.</span><span data-l="ru" lang="ru">Гифки и видео за плеером.</span></div>
-      <div class="chip"><b><span data-l="en">9 themes and your own</span><span data-l="ru" lang="ru">9 тем и свои</span></b><span data-l="en">Send your whole island to a friend as one file, GIFs included.</span><span data-l="ru" lang="ru">Свой остров можно скинуть другу одним файлом вместе с гифками.</span></div>
-      <div class="chip"><b><span data-l="en">Offline voice</span><span data-l="ru" lang="ru">Голос без интернета</span></b><span data-l="en">whisper.cpp on your PC, Russian and English.</span><span data-l="ru" lang="ru">whisper.cpp на вашем ПК, русский и английский.</span></div>
-      <div class="chip"><b><span data-l="en">Games</span><span data-l="ru" lang="ru">Игры</span></b><span data-l="en">In full-screen apps the island fades back or hides.</span><span data-l="ru" lang="ru">В полноэкранных приложениях остров приглушается или прячется.</span></div>
-      <div class="chip"><b><span data-l="en">Discord status</span><span data-l="ru" lang="ru">Статус в Discord</span></b><span data-l="en">Cover, progress, player and buttons, like Spotify's.</span><span data-l="ru" lang="ru">Обложка, время, плеер и кнопки, как у Spotify.</span></div>
-      <div class="chip"><b><span data-l="en">Gestures</span><span data-l="ru" lang="ru">Жесты</span></b><span data-l="en">Scroll on the capsule for volume, Shift+scroll to skip, middle-click to play or pause.</span><span data-l="ru" lang="ru">Колёсико над капсулой — громкость, Shift+колёсико — трек, нажатие колёсика — пауза.</span></div>
+    <p class="lede"><span data-l="en">A free Dynamic Island–style capsule for the top of Windows 11: your music, the lyrics line by line and your notifications, opening on a spring.</span><span data-l="ru" lang="ru">Бесплатная капсула в стиле Dynamic Island для Windows 11: музыка, текст песни строчка за строчкой и уведомления сверху экрана. Раскрывается одним нажатием.</span></p>
+    <div class="cta">
+      <a class="btn dl-link" href="https://github.com/ZawkyQ/nova-island-releases/releases/latest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg><span data-l="en">Download for Windows 11</span><span data-l="ru" lang="ru">Скачать для Windows 11</span></a>
+      <span class="meta"><span data-l="en">Free · Windows 11 x64<span class="ver"></span></span><span data-l="ru" lang="ru">Бесплатно · Windows 11 x64<span class="ver"></span></span></span>
     </div>
   </section>
 
-  <section id="install">
-    <h2><span data-l="en">Install in a minute</span><span data-l="ru" lang="ru">Установка за минуту</span></h2>
-    <p class="sub"><span data-l="en">Windows 11, x64. .NET and the Windows App Runtime are inside. Windows 10 is not supported.</span><span data-l="ru" lang="ru">Windows 11, x64. .NET и Windows App Runtime уже внутри. Windows 10 не поддерживается.</span></p>
-    <ol class="steps" id="steps">
-      <li><span data-l="en"><b>Download</b> the single file <code>NovaIsland-…-Setup.zip</code>.</span><span data-l="ru" lang="ru"><b>Скачайте</b> один файл <code>NovaIsland-…-Setup.zip</code>.</span></li>
-      <li><span data-l="en">Right-click it → <b>Extract All</b>, then run <code>Install.cmd</code>.</span><span data-l="ru" lang="ru">Правой кнопкой → <b>«Извлечь все»</b>, затем запустите <code>Install.cmd</code>.</span></li>
-      <li><span data-l="en">Windows asks for administrator rights <b>once</b> (the prompt says “Windows PowerShell”): click <b>Yes</b>. NOVA installs and starts; press any key to close the black window.</span><span data-l="ru" lang="ru">Windows <b>один раз</b> попросит права администратора (в окне будет «Windows PowerShell»): нажмите <b>«Да»</b>. NOVA установится и запустится; потом нажмите любую клавишу, чтобы закрыть чёрное окно.</span></li>
-    </ol>
-    <div class="notes">
-      <p class="note"><span data-l="en">If Windows shows <b>“Windows protected your PC”</b>, click <b>More info → Run anyway</b>, but only for the file you downloaded from this page.</span><span data-l="ru" lang="ru">Если Windows покажет <b>«Система Windows защитила ваш компьютер»</b>, нажмите <b>«Подробнее» → «Выполнить в любом случае»</b>, но только для файла, скачанного с этой страницы.</span></p>
-      <p class="note"><span data-l="en">On first start NOVA turns on start with Windows and sets free hotkeys (both can be changed in Settings), and Windows asks once for the microphone and notifications.</span><span data-l="ru" lang="ru">При первом запуске NOVA включает автозапуск вместе с Windows и назначает свободные горячие клавиши (и то и другое меняется в настройках), а Windows один раз спросит про микрофон и уведомления.</span></p>
-      <p class="note"><span data-l="en">Voice assistant does not start? Install the <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe">Microsoft Visual C++ Redistributable (x64)</a> from Microsoft; many PCs already have it.</span><span data-l="ru" lang="ru">Не запускается голосовой ассистент? Установите <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe">Microsoft Visual C++ Redistributable (x64)</a> с сайта Microsoft; на многих ПК он уже есть.</span></p>
+  <section class="sect" id="see" aria-labelledby="h-see">
+    <div class="grid reel">
+      <div class="text">
+        <h2 class="display" id="h-see" data-reveal><span data-l="en">Watch it open</span><span data-l="ru" lang="ru">Вот он вживую</span></h2>
+        <p data-reveal style="--d:90ms"><span data-l="en">Recorded on Windows 11 with NOVA 1.6. The capsule opens into the player, then into the lyrics, and folds back into a line at the top of the screen.</span><span data-l="ru" lang="ru">Запись с Windows 11 и NOVA 1.6. Капсула раскрывается в плеер, потом в текст песни и снова сворачивается в строчку сверху экрана.</span></p>
+      </div>
+      <figure>
+        <div class="panel"><div class="frame shutter" id="reelFrame">
+          <video id="reel" src="assets/v2/morph.mp4" poster="assets/v2/morph-poster.jpg" width="720" height="440" muted loop playsinline preload="metadata"></video>
+        </div></div>
+        <button class="pausebtn" id="reelBtn" type="button"></button>
+        <figcaption><span data-l="en">The track and the lyrics are made up for the demo.</span><span data-l="ru" lang="ru">Трек и текст придуманы для показа.</span></figcaption>
+      </figure>
     </div>
-    <details>
-      <summary><span data-l="en">Why does Windows warn me?</span><span data-l="ru" lang="ru">Почему Windows предупреждает?</span></summary>
-      <p data-l="en">NOVA Island is signed with its own certificate (<code>CN=NovaIsland Dev</code>), not a paid one, so Windows does not know the publisher yet and may say so. <code>Install.cmd</code> runs <code>Install.ps1</code> (you can read it) once, with PowerShell's script policy relaxed for that run only. The script adds the certificate to <b>Local Machine → Trusted People</b> (this is the admin prompt), removes an old developer build of NOVA if there is one (your settings stay), installs the <code>.msix</code> next to it (closing a running NOVA first) and starts NOVA. It does not turn off SmartScreen or your antivirus, and there is no need to.</p>
-      <p data-l="ru" lang="ru">NOVA Island подписана своим сертификатом (<code>CN=NovaIsland Dev</code>), а не платным, поэтому Windows пока не знает издателя и может об этом написать. <code>Install.cmd</code> один раз запускает <code>Install.ps1</code> (его можно прочитать), ослабив политику скриптов PowerShell только на этот запуск. Скрипт добавляет сертификат в <b>«Локальный компьютер → Доверенные лица»</b> (это и есть запрос прав администратора), удаляет старую сборку разработчика NOVA, если она есть (настройки остаются), ставит <code>.msix</code>, который лежит рядом (запущенную NOVA сначала закрывает), и запускает NOVA. Он не отключает SmartScreen и антивирус, и вам их отключать не нужно.</p>
-      <p><span data-l="en">Certificate thumbprint:</span><span data-l="ru" lang="ru">Отпечаток сертификата:</span> <code class="any">784A44CC9743B80100C95C3852142647B53DD8B3</code></p>
-    </details>
-    <details>
-      <summary><span data-l="en">How do I check the download?</span><span data-l="ru" lang="ru">Как проверить скачанный файл?</span></summary>
-      <p><span data-l="en">In PowerShell, in your Downloads folder, run</span><span data-l="ru" lang="ru">В PowerShell, в папке «Загрузки», выполните</span></p>
-      <pre><code>Get-FileHash .\NovaIsland-*-Setup.zip</code></pre>
-      <p><span data-l="en">and compare the result with <code>SHA256SUMS.txt</code> in the same release (upper or lower case does not matter).</span><span data-l="ru" lang="ru">и сравните результат с <code>SHA256SUMS.txt</code> в том же выпуске (регистр букв не важен).</span></p>
-    </details>
-    <details>
-      <summary><span data-l="en">The Install button of the .msix is grey</span><span data-l="ru" lang="ru">Кнопка «Установить» в .msix серая</span></summary>
-      <p><span data-l="en">Windows does not trust the certificate yet. Close that window and run <code>Install.cmd</code> from the Setup.zip instead.</span><span data-l="ru" lang="ru">Windows ещё не доверяет сертификату. Закройте это окно и запустите <code>Install.cmd</code> из Setup.zip.</span></p>
-    </details>
-    <details>
-      <summary><span data-l="en">How do updates work?</span><span data-l="ru" lang="ru">Как обновляться?</span></summary>
-      <p><span data-l="en">NOVA tells you when a new version is out. Click <b>Settings → About → Updates → Download and install</b>, then confirm in the Windows installer window that opens.</span><span data-l="ru" lang="ru">NOVA сама скажет о новой версии. Нажмите <b>«Настройки → О программе → Обновления → Скачать и установить»</b> и подтвердите установку в открывшемся окне Windows.</span></p>
-    </details>
-    <details>
-      <summary><span data-l="en">How do I uninstall it?</span><span data-l="ru" lang="ru">Как удалить?</span></summary>
-      <p><span data-l="en"><b>Settings → Apps → Installed apps → NOVA Island → Uninstall.</b> To also remove the certificate, run in an administrator PowerShell:</span><span data-l="ru" lang="ru"><b>«Параметры → Приложения → Установленные приложения → NOVA Island → Удалить».</b> Чтобы удалить и сертификат, выполните в PowerShell от имени администратора:</span></p>
-      <pre><code class="any">Remove-Item Cert:\LocalMachine\TrustedPeople\784A44CC9743B80100C95C3852142647B53DD8B3</code></pre>
-      <p><span data-l="en">Your settings, GIF library, logs and the voice model stay in <code>%LOCALAPPDATA%\NovaIsland</code>; delete that folder to remove them too.</span><span data-l="ru" lang="ru">Настройки, гифки, журналы и модель голоса остаются в папке <code>%LOCALAPPDATA%\NovaIsland</code>; удалите её, чтобы стереть и их.</span></p>
-    </details>
-    <details>
-      <summary><span data-l="en">Known limitations</span><span data-l="ru" lang="ru">Известные ограничения</span></summary>
-      <ul data-l="en">
-        <li>Over exclusive full-screen apps, Windows may not show the island.</li>
-        <li>Shuffle and repeat work only with players that report them to Windows (browsers do not). Windows gives apps no likes or queue.</li>
-        <li>Battery level is shown only for Bluetooth devices that report it to Windows.</li>
-        <li>Because the certificate is self-signed, SmartScreen may warn about an unknown publisher.</li>
-      </ul>
-      <ul data-l="ru" lang="ru">
-        <li>Поверх эксклюзивного полноэкранного режима Windows может не показать остров.</li>
-        <li>Перемешивание и повтор работают только у плееров, которые сообщают их Windows (браузеры не сообщают). Лайков и очереди Windows приложениям не даёт.</li>
-        <li>Заряд показывается только у Bluetooth-устройств, которые сообщают его Windows.</li>
-        <li>Сертификат самоподписанный, поэтому SmartScreen может предупредить о неизвестном издателе.</li>
-      </ul>
-    </details>
   </section>
 
-  <section id="privacy">
-    <h2><span data-l="en">What NOVA sends to the internet</span><span data-l="ru" lang="ru">Что NOVA отправляет в интернет</span></h2>
-    <p class="sub"><span data-l="en">NOVA itself has no ads, accounts, analytics or telemetry. This is everything it sends:</span><span data-l="ru" lang="ru">В самой NOVA нет рекламы, аккаунтов, аналитики и телеметрии. Вот всё, что она отправляет:</span></p>
-    <div class="tablebox">
-      <table>
-        <thead><tr>
-          <th><span data-l="en">What</span><span data-l="ru" lang="ru">Что</span></th>
-          <th><span data-l="en">Where</span><span data-l="ru" lang="ru">Куда</span></th>
-          <th><span data-l="en">When</span><span data-l="ru" lang="ru">Когда</span></th>
-          <th><span data-l="en">Turn off</span><span data-l="ru" lang="ru">Где выключить</span></th>
-        </tr></thead>
-        <tbody>
-          <tr><td><span data-l="en">Artist, title, album and length of the track (or the words you type in the manual search), to find lyrics</span><span data-l="ru" lang="ru">Исполнитель, название, альбом и длина трека (или слова, которые вы ввели в ручном поиске), чтобы найти текст</span></td><td>lrclib.net</td><td><span data-l="en">A track without a local .lrc or saved lyrics starts, or you search by hand</span><span data-l="ru" lang="ru">Начался трек без локального файла .lrc и без сохранённого текста, или вы ищете вручную</span></td><td><span data-l="en">Settings → Lyrics</span><span data-l="ru" lang="ru">Настройки → Тексты</span></td></tr>
-          <tr><td><span data-l="en">The voice model, once (~57 MB; ~31 MB if you pick Tiny)</span><span data-l="ru" lang="ru">Модель голоса, один раз (~57 МБ; ~31 МБ, если выбрать Tiny)</span></td><td><span data-l="en">huggingface.co and its file servers</span><span data-l="ru" lang="ru">huggingface.co и его файловые серверы</span></td><td><span data-l="en">While voice is on and the model is not on your PC yet (normally right after the first start)</span><span data-l="ru" lang="ru">Пока голос включён, а модели ещё нет на ПК (обычно сразу после первого запуска)</span></td><td><span data-l="en">Settings → Voice</span><span data-l="ru" lang="ru">Настройки → Голос</span></td></tr>
-          <tr><td><span data-l="en">Update check (and the download count in About)</span><span data-l="ru" lang="ru">Проверка обновлений (и счётчик скачиваний в «О программе»)</span></td><td><span data-l="en">api.github.com, the NOVA releases repository</span><span data-l="ru" lang="ru">api.github.com, репозиторий выпусков NOVA</span></td><td><span data-l="en">About a minute after start if “Check at start” is on (it is by default), and when you click “Check now”</span><span data-l="ru" lang="ru">Через минуту после запуска, если включено «Проверять при запуске» (включено по умолчанию), и по кнопке «Проверить сейчас»</span></td><td><span data-l="en">Settings → About → Updates</span><span data-l="ru" lang="ru">Настройки → О программе → Обновления</span></td></tr>
-          <tr><td><span data-l="en">The new version</span><span data-l="ru" lang="ru">Новая версия</span></td><td><span data-l="en">github.com and its download servers</span><span data-l="ru" lang="ru">github.com и его серверы загрузки</span></td><td><span data-l="en">Only when you click “Download and install”</span><span data-l="ru" lang="ru">Только по нажатию «Скачать и установить»</span></td><td>—</td></tr>
-          <tr><td><span data-l="en">Track, artist, album, player, progress, cover and buttons, shown in your Discord status to your friends and members of your servers</span><span data-l="ru" lang="ru">Трек, исполнитель, альбом, плеер, время, обложка и кнопки — их видят в вашем статусе Discord друзья и участники ваших серверов</span></td><td><span data-l="en">Discord, through the Discord app on your PC</span><span data-l="ru" lang="ru">Discord, через приложение Discord на вашем ПК</span></td><td><span data-l="en">While Discord is running</span><span data-l="ru" lang="ru">Пока запущен Discord</span></td><td><span data-l="en">Settings → Discord</span><span data-l="ru" lang="ru">Настройки → Discord</span></td></tr>
-          <tr><td><span data-l="en">Artist and title, to find a cover for the Discord status</span><span data-l="ru" lang="ru">Исполнитель и название, чтобы найти обложку для статуса Discord</span></td><td>itunes.apple.com, api.deezer.com</td><td><span data-l="en">Only while connected to Discord</span><span data-l="ru" lang="ru">Только пока есть связь с Discord</span></td><td><span data-l="en">Settings → Discord</span><span data-l="ru" lang="ru">Настройки → Discord</span></td></tr>
-          <tr><td><span data-l="en">Artist and title of the playing track, as a YouTube search</span><span data-l="ru" lang="ru">Исполнитель и название играющего трека как поиск на YouTube</span></td><td><span data-l="en">youtube.com, in your browser</span><span data-l="ru" lang="ru">youtube.com в браузере</span></td><td><span data-l="en">Only when you click “Find on YouTube”</span><span data-l="ru" lang="ru">Только по нажатию «Найти на YouTube»</span></td><td>—</td></tr>
-        </tbody>
-      </table>
+  <section class="try" id="try" aria-labelledby="h-try">
+    <h2 class="vh" id="h-try"><span data-l="en">Type your song</span><span data-l="ru" lang="ru">Напишите свою песню</span></h2>
+    <label class="display typeline" data-ui>
+      <span class="vh" data-l="en">What are you listening to? Artist and title</span><span class="vh" data-l="ru" lang="ru">Что вы слушаете? Исполнитель и название</span>
+      <input id="song" type="text" value="Midnight Static — Vera Nox" spellcheck="false" autocomplete="off" maxlength="80">
+    </label>
+    <p class="trydesc"><span data-l="en">Type what you're listening to: this is how NOVA shows it, small at the top of the screen and open after a click.</span><span data-l="ru" lang="ru">Напишите, что слушаете: так это покажет NOVA — строчкой сверху экрана и плеером после нажатия.</span></p>
+    <div class="answer">
+      <div data-ui>
+        <div class="capwrap"><span class="cap" id="tryCap"><span class="cover"></span><span class="line"><span class="lyric-text">City lights are humming low</span></span><span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span></span></div>
+        <div class="player" data-player>
+          <div class="top">
+            <span class="cover"></span>
+            <div style="min-width:0">
+              <div class="title song-title">Midnight Static</div>
+              <div class="artist song-artist">Vera Nox</div>
+              <span class="chip song-source">Demo</span>
+            </div>
+            <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          </div>
+          <div class="lyric"><span class="lyric-text">City lights are humming low</span></div>
+          <div class="seek"><span class="pos">0:00</span><span class="track"><b></b></span><span class="left">−4:03</span></div>
+          <div class="controls">
+            <span class="dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="m4 16 5-5 4 4 3-3 4 4"/></svg></span>
+            <span><svg class="dim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 7h4l10 10h4M3 17h4l3-3m4-4 3-3h4m-3-3 3 3-3 3m0 4 3 3-3 3"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14l-10-7z"/></svg><button class="big playpause" type="button"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><span class="vh">Pause</span></button><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l10-7z"/></svg><svg class="dim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 12V9a3 3 0 0 1 3-3h12m-3-3 3 3-3 3M20 12v3a3 3 0 0 1-3 3H5m3 3-3-3 3-3"/></svg></span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10zM16 9a4 4 0 0 1 0 6"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <div class="examples">
+        <p><span data-l="en">Or try:</span><span data-l="ru" lang="ru">Или так:</span></p>
+        <button type="button" data-song="Blinding Lights — The Weeknd">Blinding Lights — The Weeknd</button>
+        <button type="button" data-song="Группа крови — Кино">Группа крови — Кино</button>
+        <button type="button" data-song="Midnight Static — Vera Nox">Midnight Static — Vera Nox</button>
+      </div>
     </div>
-    <p class="never"><span data-l="en">Each of these requests carries the app's name and version and, like any connection, your IP address. Other links in the app open in your browser only when you click them. Windows and the bundled Windows App Runtime may send Microsoft diagnostic data, as your Windows privacy settings allow.</span><span data-l="ru" lang="ru">В каждом из этих запросов есть название и версия программы и, как при любом подключении, ваш IP-адрес. Другие ссылки в программе открываются в браузере только по нажатию. Windows и встроенный Windows App Runtime могут отправлять Microsoft диагностические данные, насколько это разрешают настройки конфиденциальности Windows.</span></p>
-    <p class="never"><span data-l="en"><b>Never sent by NOVA:</b> notification text; your voice (the microphone opens only while the island is listening to you, and speech is recognized on your PC); the sound for the equalizer (analysed in memory and dropped at once); your GIFs, themes, settings and logs. A profile you export holds all your settings and GIFs; NOVA never sends it, you choose who gets it.</span><span data-l="ru" lang="ru"><b>NOVA никуда не отправляет:</b> текст уведомлений; ваш голос (микрофон включается, только пока остров вас слушает, и речь распознаётся на вашем ПК); звук для эквалайзера (разбирается в памяти и сразу забывается); ваши гифки, темы, настройки и журналы. В экспортированном профиле лежат все ваши настройки и гифки; NOVA его никуда не отправляет, кому его дать, решаете вы.</span></p>
-    <p class="never"><a class="keep-lang" href="privacy.html"><span data-l="en">Full privacy policy</span><span data-l="ru" lang="ru">Политика конфиденциальности целиком</span></a></p>
+  </section>
+
+  <section id="features" aria-labelledby="h-feat">
+    <div class="grid feat-head">
+      <h2 class="display" id="h-feat" data-reveal><span data-l="en">It plays along</span><span data-l="ru" lang="ru">Играет с вами</span></h2>
+    </div>
+    <div class="grid row">
+      <div class="txt"><h3 class="h3" data-reveal><span data-l="en">Any player</span><span data-l="ru" lang="ru">Любой плеер</span></h3><p data-reveal style="--d:80ms"><span data-l="en">Spotify, Yandex Music, your browser: whatever Windows sees. Drag to seek; shuffle and repeat where the player gives them.</span><span data-l="ru" lang="ru">Spotify, Яндекс Музыка, браузер — всё, что видит Windows. Перемотка перетаскиванием, перемешивание и повтор, если плеер их даёт.</span></p></div>
+      <img class="pic w1" data-reveal style="--d:160ms" src="assets/v2/player.webp" width="633" height="335" loading="lazy" alt="NOVA Island player with cover, seek bar and controls">
+    </div>
+    <div class="grid row">
+      <div class="txt"><h3 class="h3" data-reveal><span data-l="en">Lyrics, line by line</span><span data-l="ru" lang="ru">Текст по строчкам</span></h3><p data-reveal style="--d:80ms"><span data-l="en">From your own .lrc files or LRCLIB. Lines change only on real timestamps, never guessed, and one line can live right in the small capsule.</span><span data-l="ru" lang="ru">Из ваших файлов .lrc или с LRCLIB. Строки сменяются только по настоящим временным меткам, ничего не угадывается, а одна строчка может жить прямо в маленькой капсуле.</span></p></div>
+      <img class="pic w3" data-reveal style="--d:160ms" src="assets/v2/lyrics.webp" width="654" height="432" loading="lazy" alt="Synced lyrics with the current line highlighted">
+    </div>
+    <div class="grid row">
+      <div class="txt"><h3 class="h3" data-reveal><span data-l="en">Sleep timer</span><span data-l="ru" lang="ru">Таймер сна</span></h3><p data-reveal style="--d:80ms"><span data-l="en">Pause in 15, 30 or 60 minutes, or at the end of the track. Copy the title, find it on YouTube, switch between apps that are playing.</span><span data-l="ru" lang="ru">Пауза через 15, 30 или 60 минут или в конце трека. Скопировать название, найти на YouTube, переключиться между играющими приложениями.</span></p></div>
+      <img class="pic w2" data-reveal style="--d:160ms" src="assets/v2/more.webp" width="638" height="338" loading="lazy" alt="The More menu with sleep timer choices">
+    </div>
+    <div class="grid row">
+      <div class="txt"><h3 class="h3" data-reveal><span data-l="en">The player's own volume</span><span data-l="ru" lang="ru">Громкость плеера</span></h3><p data-reveal style="--d:80ms"><span data-l="en">Scroll over the player to change that app's volume, not all of Windows. If the player has no sound of its own, NOVA says so and moves the Windows volume.</span><span data-l="ru" lang="ru">Колёсико над плеером меняет громкость этого приложения, а не всей Windows. Если у плеера нет своего звука, NOVA так и скажет и изменит громкость Windows.</span></p></div>
+      <img class="pic w1" data-reveal style="--d:160ms" src="assets/v2/volume.webp" width="637" height="338" loading="lazy" alt="Player volume row at 80 percent">
+    </div>
+    <div class="grid row">
+      <div class="txt"><h3 class="h3" data-reveal><span data-l="en">System center</span><span data-l="ru" lang="ru">Системный центр</span></h3><p data-reveal style="--d:80ms"><span data-l="en">The clock, the volume and Windows notifications, with quiet hours and flood protection. Notification text is never stored.</span><span data-l="ru" lang="ru">Часы, громкость и уведомления Windows, тихие часы и защита от потока уведомлений. Их текст нигде не сохраняется.</span></p></div>
+      <img class="pic w3" data-reveal style="--d:160ms" src="assets/v2/system.webp" width="651" height="416" loading="lazy" alt="System center with the clock and the volume slider">
+    </div>
+    <div class="grid also">
+      <p data-reveal><span data-l="en">Also inside: GIF and video backgrounds for the player, an offline voice assistant (whisper.cpp, Russian and English), hotkeys, a game mode, and a Discord status like Spotify's.</span><span data-l="ru" lang="ru">Ещё внутри: гифки и видео фоном плеера, голосовой ассистент без интернета (whisper.cpp, русский и английский), горячие клавиши, игровой режим и статус в Discord, как у Spotify.</span></p>
+    </div>
+  </section>
+
+  <section class="themes" id="themes" aria-labelledby="h-themes">
+    <h2 class="display" id="h-themes"><span data-l="en">Nine<br>themes</span><span data-l="ru" lang="ru">Девять<br>тем</span></h2>
+    <p class="note" data-reveal><span data-l="en">Obsidian, Aurora, Prism, Neon, Sunset, Ocean, Forest, Sakura and Graphite, or your own. Send your whole island to a friend as one file, GIFs included.</span><span data-l="ru" lang="ru">Obsidian, Aurora, Prism, Neon, Sunset, Ocean, Forest, Sakura и Graphite, или своя. Свой остров можно скинуть другу одним файлом вместе с гифками.</span></p>
+    <div class="table">
+    <div class="print a" tabindex="0"><img src="assets/v2/sakura-player.webp" width="677" height="356" loading="lazy" alt="NOVA Island in the Sakura theme"></div>
+    <div class="print b" tabindex="0"><img src="assets/v2/sunset-player.webp" width="678" height="357" loading="lazy" alt="NOVA Island in the Sunset theme"></div>
+    <div class="print c" tabindex="0"><img src="assets/v2/neon-player.webp" width="625" height="330" loading="lazy" alt="NOVA Island in the Neon theme"></div>
+    <div class="print d" tabindex="0"><img src="assets/v2/ocean-player.webp" width="667" height="353" loading="lazy" alt="NOVA Island in the Ocean theme"></div>
+    </div>
+  </section>
+
+  <section id="install" class="install" aria-labelledby="h-inst">
+    <div class="left">
+      <h2 class="display" id="h-inst" aria-live="polite">
+        <span class="st" data-s="0"><span data-l="en">First, one file</span><span data-l="ru" lang="ru">Сначала один файл</span></span>
+        <span class="st" data-s="1" hidden><span data-l="en">Then extract it</span><span data-l="ru" lang="ru">Потом распакуйте</span></span>
+        <span class="st" data-s="2" hidden><span data-l="en">Install.cmd, then Yes</span><span data-l="ru" lang="ru">Install.cmd, потом «Да»</span></span>
+        <span class="st" data-s="3" hidden><span data-l="en">Now look up</span><span data-l="ru" lang="ru">Теперь глядите наверх</span></span>
+      </h2>
+      <div class="say">
+        <p class="st" data-s="0"><span data-l="en">Download <b>NovaIsland-…-Setup.zip</b>, about 70 MB. It needs Windows 11, x64; .NET and the Windows App Runtime are inside.</span><span data-l="ru" lang="ru">Скачайте <b>NovaIsland-…-Setup.zip</b>, около 70 МБ. Нужна Windows 11, x64; .NET и Windows App Runtime уже внутри.</span></p>
+        <p class="st" data-s="1" hidden><span data-l="en">Right-click it → Extract All. Inside: the installer, the package, the certificate and the licenses.</span><span data-l="ru" lang="ru">Правой кнопкой → «Извлечь все». Внутри установщик, пакет, сертификат и лицензии.</span></p>
+        <p class="st" data-s="2" hidden><span data-l="en">Run Install.cmd. Windows asks once for administrator rights (the window says “Windows PowerShell”) so it can trust NOVA's own certificate: click Yes. If you see “Windows protected your PC”, click More info → Run anyway, only for the file from this page.</span><span data-l="ru" lang="ru">Запустите Install.cmd. Windows один раз попросит права администратора (в окне будет «Windows PowerShell»), чтобы доверять сертификату NOVA: нажмите «Да». Если появится «Система Windows защитила ваш компьютер» — «Подробнее» → «Выполнить в любом случае», только для файла с этой страницы.</span></p>
+        <p class="st" data-s="3" hidden><span data-l="en">NOVA dives in at the top of the screen. On first start it turns on start with Windows and sets free hotkeys (both change in Settings); Windows asks once for the microphone and notifications.</span><span data-l="ru" lang="ru">NOVA ныряет на верх экрана. При первом запуске она включает автозапуск и назначает свободные горячие клавиши (то и другое меняется в настройках), а Windows один раз спросит про микрофон и уведомления.</span></p>
+      </div>
+      <a class="btn dl-link" href="https://github.com/ZawkyQ/nova-island-releases/releases/latest" style="align-self:flex-start"><span data-l="en">Download for Windows 11</span><span data-l="ru" lang="ru">Скачать для Windows 11</span></a>
+    </div>
+    <div class="right">
+      <div class="stagebox">
+        <div class="stage on" data-s="0" data-ui>
+          <div class="win"><div class="head"><span data-l="en">Downloads</span><span data-l="ru" lang="ru">Загрузки</span></div>
+            <div class="body"><div class="file"><span class="ico"></span><span><b>NovaIsland-1.6.0-Setup.zip</b><small class="dl-size">70 MB · <span data-l="en">Done</span><span data-l="ru" lang="ru">Готово</span></small></span><span class="open"><span data-l="en">Open file</span><span data-l="ru" lang="ru">Открыть</span></span></div><div class="done"></div></div></div>
+        </div>
+        <div class="stage" data-s="1" data-ui>
+          <div class="win"><div class="head">NovaIsland-1.6.0</div>
+            <div class="body" style="padding:6px 0"><table class="list">
+              <tr class="hi"><td>Install.cmd</td><td>Windows Batch</td></tr>
+              <tr><td>Install.ps1</td><td>PowerShell</td></tr>
+              <tr><td>NovaIsland-1.6.0-x64.msix</td><td>MSIX</td></tr>
+              <tr><td>NovaIsland.cer</td><td><span data-l="en">Certificate</span><span data-l="ru" lang="ru">Сертификат</span></td></tr>
+              <tr><td>RELEASE-NOTES.md</td><td>Markdown</td></tr>
+              <tr><td>THIRD-PARTY-NOTICES.txt</td><td><span data-l="en">Text</span><span data-l="ru" lang="ru">Текст</span></td></tr>
+              <tr><td>licenses</td><td><span data-l="en">Folder</span><span data-l="ru" lang="ru">Папка</span></td></tr>
+            </table></div></div>
+        </div>
+        <div class="stage" data-s="2" data-ui>
+          <div class="uac"><div class="band"><span data-l="en">User Account Control</span><span data-l="ru" lang="ru">Контроль учётных записей</span></div>
+            <div class="q"><span data-l="en">Do you want to allow this app to make changes to your device?</span><span data-l="ru" lang="ru">Разрешить этому приложению вносить изменения на вашем устройстве?</span></div>
+            <div class="who"><b>Windows PowerShell</b><span data-l="en">Verified publisher: Microsoft Windows</span><span data-l="ru" lang="ru">Проверенный издатель: Microsoft Windows</span></div>
+            <div class="btns"><span class="yes"><span data-l="en">Yes</span><span data-l="ru" lang="ru">Да</span></span><span><span data-l="en">No</span><span data-l="ru" lang="ru">Нет</span></span></div></div>
+        </div>
+        <div class="stage" data-s="3">
+          <div class="dive"><video id="dive" src="assets/v2/dive.mp4" poster="assets/v2/dive-poster.jpg" width="720" height="200" muted playsinline preload="none"></video>
+            <p><span data-l="en">The real launch dive, recorded on Windows 11.</span><span data-l="ru" lang="ru">Настоящий «нырок» при запуске, запись с Windows 11.</span></p></div>
+          <button class="replay" id="replay" type="button"><span data-l="en">Play the dive again</span><span data-l="ru" lang="ru">Показать нырок ещё раз</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="slide">
+      <label class="vh" for="stage"><span data-l="en">Install stage</span><span data-l="ru" lang="ru">Шаг установки</span></label>
+      <div class="rail" id="rail"><span class="fill"></span><input id="stage" type="range" min="0" max="3" step="1" value="0"></div>
+      <div class="names">
+        <button type="button" data-go="0" class="on"><span data-l="en">Download</span><span data-l="ru" lang="ru">Скачать</span></button>
+        <button type="button" data-go="1"><span data-l="en">Extract</span><span data-l="ru" lang="ru">Распаковать</span></button>
+        <button type="button" data-go="2"><span data-l="en">Install</span><span data-l="ru" lang="ru">Установить</span></button>
+        <button type="button" data-go="3"><span data-l="en">On top</span><span data-l="ru" lang="ru">Наверху</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect" id="privacy" aria-labelledby="h-priv">
+    <div class="grid priv-head">
+      <h2 class="display" id="h-priv" data-reveal><span data-l="en"><span class="indent">What leaves</span><br>your PC</span><span data-l="ru" lang="ru"><span class="indent">Что уходит</span><br>с вашего ПК</span></h2>
+    </div>
+    <div class="grid priv-body">
+      <div class="never" data-reveal>
+        <h3 class="h3"><span data-l="en">Never sent by NOVA</span><span data-l="ru" lang="ru">NOVA никуда не отправляет</span></h3>
+        <ul>
+          <li><b><span data-l="en">Notification text.</span><span data-l="ru" lang="ru">Текст уведомлений.</span></b> <span data-l="en">Shown on the island, never stored.</span><span data-l="ru" lang="ru">Показывается на острове и нигде не сохраняется.</span></li>
+          <li><b><span data-l="en">Your voice.</span><span data-l="ru" lang="ru">Ваш голос.</span></b> <span data-l="en">The microphone opens only while the island is listening to you; speech is recognized on your PC.</span><span data-l="ru" lang="ru">Микрофон включается, только пока остров вас слушает; речь распознаётся на вашем ПК.</span></li>
+          <li><b><span data-l="en">Sound for the equalizer.</span><span data-l="ru" lang="ru">Звук для эквалайзера.</span></b> <span data-l="en">Analysed in memory and dropped at once.</span><span data-l="ru" lang="ru">Разбирается в памяти и сразу забывается.</span></li>
+          <li><b><span data-l="en">Your GIFs, themes, settings and logs.</span><span data-l="ru" lang="ru">Ваши гифки, темы, настройки и журналы.</span></b> <span data-l="en">A profile you export holds all your settings and GIFs; you choose who gets it.</span><span data-l="ru" lang="ru">В экспортированном профиле лежат все настройки и гифки; кому его дать, решаете вы.</span></li>
+        </ul>
+      </div>
+      <div class="sends" data-reveal style="--d:90ms" role="table" aria-label="What NOVA sends">
+        <div class="r" role="row"><span class="k" role="cell"><span data-l="en">Artist, title, album, length (or your manual search)</span><span data-l="ru" lang="ru">Исполнитель, название, альбом, длина (или ваш ручной поиск)</span></span><span class="w" role="cell">lrclib.net</span><span class="t" role="cell"><span data-l="en">A track without a local .lrc or saved lyrics</span><span data-l="ru" lang="ru">Трек без своего .lrc и сохранённого текста</span><small><span data-l="en">Settings → Lyrics</span><span data-l="ru" lang="ru">Настройки → Тексты</span></small></span></div>
+        <div class="r" role="row"><span class="k" role="cell"><span data-l="en">The voice model, once (~57 MB; ~31 MB for Tiny)</span><span data-l="ru" lang="ru">Модель голоса, один раз (~57 МБ; ~31 МБ для Tiny)</span></span><span class="w" role="cell">huggingface.co</span><span class="t" role="cell"><span data-l="en">While voice is on and the model is missing</span><span data-l="ru" lang="ru">Пока голос включён, а модели нет</span><small><span data-l="en">Settings → Voice</span><span data-l="ru" lang="ru">Настройки → Голос</span></small></span></div>
+        <div class="r gap" role="row"><span class="k" role="cell"><span data-l="en">Update check and the download count</span><span data-l="ru" lang="ru">Проверка обновлений и счётчик скачиваний</span></span><span class="w" role="cell">api.github.com</span><span class="t" role="cell"><span data-l="en">A minute after start if “Check at start” is on (default), and on “Check now”</span><span data-l="ru" lang="ru">Через минуту после запуска, если включено «Проверять при запуске» (по умолчанию), и по «Проверить сейчас»</span><small><span data-l="en">Settings → About → Updates</span><span data-l="ru" lang="ru">Настройки → О программе → Обновления</span></small></span></div>
+        <div class="r" role="row"><span class="k" role="cell"><span data-l="en">The new version</span><span data-l="ru" lang="ru">Новая версия</span></span><span class="w" role="cell">github.com</span><span class="t" role="cell"><span data-l="en">Only when you click “Download and install”</span><span data-l="ru" lang="ru">Только по нажатию «Скачать и установить»</span></span></div>
+        <div class="r gap" role="row"><span class="k" role="cell"><span data-l="en">Track, artist, album, player, progress, cover and buttons in your status, seen by friends and members of your servers</span><span data-l="ru" lang="ru">Трек, исполнитель, альбом, плеер, время, обложка и кнопки в статусе — их видят друзья и участники ваших серверов</span></span><span class="w" role="cell">Discord</span><span class="t" role="cell"><span data-l="en">While the Discord app runs on your PC</span><span data-l="ru" lang="ru">Пока на ПК запущен Discord</span><small><span data-l="en">Settings → Discord</span><span data-l="ru" lang="ru">Настройки → Discord</span></small></span></div>
+        <div class="r" role="row"><span class="k" role="cell"><span data-l="en">Artist and title, to find a cover for that status</span><span data-l="ru" lang="ru">Исполнитель и название, чтобы найти обложку для статуса</span></span><span class="w" role="cell">Apple, Deezer</span><span class="t" role="cell"><span data-l="en">Only while connected to Discord</span><span data-l="ru" lang="ru">Только пока есть связь с Discord</span><small><span data-l="en">Settings → Discord</span><span data-l="ru" lang="ru">Настройки → Discord</span></small></span></div>
+        <div class="r" role="row"><span class="k" role="cell"><span data-l="en">Artist and title as a search</span><span data-l="ru" lang="ru">Исполнитель и название как поиск</span></span><span class="w" role="cell">YouTube</span><span class="t" role="cell"><span data-l="en">Only when you click “Find on YouTube”</span><span data-l="ru" lang="ru">Только по нажатию «Найти на YouTube»</span></span></div>
+      </div>
+      <p class="fine" data-reveal><span data-l="en">Each request carries the app's name and version and, like any connection, your IP address; the files come from each service's own servers. NOVA itself has no ads, accounts, analytics or telemetry; Windows and the bundled Windows App Runtime may send Microsoft diagnostic data as your Windows privacy settings allow. <a class="keep-lang" href="privacy.html">Full privacy policy</a>.</span><span data-l="ru" lang="ru">В каждом запросе есть название и версия программы и, как при любом подключении, ваш IP-адрес; файлы приходят с серверов самих служб. В самой NOVA нет рекламы, аккаунтов, аналитики и телеметрии; Windows и встроенный Windows App Runtime могут отправлять Microsoft диагностические данные, насколько разрешают настройки Windows. <a class="keep-lang" href="privacy.html">Политика конфиденциальности</a>.</span></p>
+    </div>
+  </section>
+
+  <section class="sect" id="faq" aria-labelledby="h-faq" style="padding-top:0;padding-bottom:clamp(80px, 9vw, 130px)">
+    <div class="grid faq">
+      <h2 class="display" id="h-faq" data-reveal><span data-l="en">Questions</span><span data-l="ru" lang="ru">Вопросы</span></h2>
+      <div class="qs">
+        <details data-reveal>
+          <summary><span data-l="en">Why does Windows warn me?</span><span data-l="ru" lang="ru">Почему Windows предупреждает?</span></summary>
+          <div class="a"><p><span data-l="en">NOVA is signed with its own certificate (CN=NovaIsland Dev), not a paid one, so Windows does not know the publisher yet. Install.cmd runs Install.ps1 (you can read it) once with PowerShell's script policy relaxed for that run only: it adds the certificate to Local Machine → Trusted People, removes an old developer build if there is one (your settings stay), installs the .msix next to it and starts NOVA. It does not turn off SmartScreen or your antivirus, and there is no need to.</span><span data-l="ru" lang="ru">NOVA подписана своим сертификатом (CN=NovaIsland Dev), а не платным, поэтому Windows пока не знает издателя. Install.cmd один раз запускает Install.ps1 (его можно прочитать), ослабив политику скриптов PowerShell только на этот запуск: скрипт добавляет сертификат в «Локальный компьютер → Доверенные лица», удаляет старую сборку разработчика, если она есть (настройки остаются), ставит .msix, который лежит рядом, и запускает NOVA. SmartScreen и антивирус он не отключает, и вам их отключать не нужно.</span></p>
+          <p><span data-l="en">Opened the .msix directly and its Install button is grey? Run Install.cmd instead. Certificate thumbprint:</span><span data-l="ru" lang="ru">Открыли .msix напрямую, и кнопка «Установить» серая? Запустите Install.cmd. Отпечаток сертификата:</span> <code>784A44CC9743B80100C95C3852142647B53DD8B3</code></p></div>
+        </details>
+        <details data-reveal style="--d:60ms">
+          <summary><span data-l="en">How do I check the download?</span><span data-l="ru" lang="ru">Как проверить скачанный файл?</span></summary>
+          <div class="a"><p><span data-l="en">In PowerShell, in your Downloads folder, run</span><span data-l="ru" lang="ru">В PowerShell, в папке «Загрузки», выполните</span> <code>Get-FileHash .\NovaIsland-*-Setup.zip</code> <span data-l="en">and compare the result with SHA256SUMS.txt in the same release (upper or lower case does not matter).</span><span data-l="ru" lang="ru">и сравните результат с SHA256SUMS.txt в том же выпуске (регистр букв не важен).</span></p></div>
+        </details>
+        <details data-reveal style="--d:120ms">
+          <summary><span data-l="en">How do updates work?</span><span data-l="ru" lang="ru">Как обновляться?</span></summary>
+          <div class="a"><p><span data-l="en">NOVA tells you when a new version is out. Click Settings → About → Updates → Download and install, then confirm in the Windows installer window that opens.</span><span data-l="ru" lang="ru">NOVA сама скажет о новой версии. Нажмите «Настройки → О программе → Обновления → Скачать и установить» и подтвердите установку в открывшемся окне Windows.</span></p></div>
+        </details>
+        <details data-reveal style="--d:180ms">
+          <summary><span data-l="en">The voice assistant does not start</span><span data-l="ru" lang="ru">Не запускается голосовой ассистент</span></summary>
+          <div class="a"><p><span data-l="en">Install the</span><span data-l="ru" lang="ru">Установите</span> <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe">Microsoft Visual C++ Redistributable (x64)</a> <span data-l="en">from Microsoft; many PCs already have it. Voice also needs its model, which downloads by itself while voice is on.</span><span data-l="ru" lang="ru">с сайта Microsoft; на многих ПК он уже есть. Ещё голосу нужна модель: она скачивается сама, пока голос включён.</span></p></div>
+        </details>
+        <details data-reveal style="--d:180ms">
+          <summary><span data-l="en">What doesn't it do?</span><span data-l="ru" lang="ru">Чего он не умеет?</span></summary>
+          <div class="a"><p><span data-l="en">It needs Windows 11; Windows 10 is not supported. Over exclusive full-screen apps Windows may not show the island. Shuffle and repeat work only with players that report them to Windows (browsers do not), and Windows gives apps no likes or queue. Battery level shows only for Bluetooth devices that report it.</span><span data-l="ru" lang="ru">Нужна Windows 11, Windows 10 не поддерживается. Поверх эксклюзивного полноэкранного режима Windows может не показать остров. Перемешивание и повтор работают только у плееров, которые сообщают их Windows (браузеры не сообщают), а лайков и очереди Windows приложениям не даёт. Заряд виден только у Bluetooth-устройств, которые его сообщают.</span></p></div>
+        </details>
+        <details data-reveal style="--d:180ms">
+          <summary><span data-l="en">How do I uninstall it?</span><span data-l="ru" lang="ru">Как удалить?</span></summary>
+          <div class="a"><p><span data-l="en">Settings → Apps → Installed apps → NOVA Island → Uninstall. To also remove the certificate, run this in an administrator PowerShell:</span><span data-l="ru" lang="ru">«Параметры → Приложения → Установленные приложения → NOVA Island → Удалить». Чтобы удалить и сертификат, выполните в PowerShell от имени администратора:</span> <code>Remove-Item Cert:\LocalMachine\TrustedPeople\784A44CC9743B80100C95C3852142647B53DD8B3</code></p>
+          <p><span data-l="en">Your settings, GIF library, logs and the voice model stay in %LOCALAPPDATA%\NovaIsland; delete that folder to remove them too.</span><span data-l="ru" lang="ru">Настройки, гифки, журналы и модель голоса остаются в папке %LOCALAPPDATA%\NovaIsland; удалите её, чтобы стереть и их.</span></p></div>
+        </details>
+      </div>
+    </div>
   </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <div class="row">
-      <a href="https://github.com/ZawkyQ/nova-island-releases/releases"><span data-l="en">All releases</span><span data-l="ru" lang="ru">Все выпуски</span></a>
-      <a href="https://github.com/ZawkyQ/nova-island-releases/issues/new"><span data-l="en">Report a bug (GitHub account)</span><span data-l="ru" lang="ru">Сообщить об ошибке (нужен GitHub)</span></a>
-      <a href="https://t.me/killuez"><span data-l="en">Telegram (in Russian)</span><span data-l="ru" lang="ru">Telegram</span></a>
-      <a class="keep-lang" href="privacy.html"><span data-l="en">Privacy</span><span data-l="ru" lang="ru">Конфиденциальность</span></a>
+<footer aria-labelledby="h-foot">
+  <div class="grid top">
+    <div class="inv">
+      <h2 class="display" id="h-foot"><span data-l="en">Put it<br>on top</span><span data-l="ru" lang="ru">Поставьте<br>наверх</span></h2>
+      <a class="btn dark dl-link" href="https://github.com/ZawkyQ/nova-island-releases/releases/latest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg><span data-l="en">Download for Windows 11</span><span data-l="ru" lang="ru">Скачать для Windows 11</span></a>
     </div>
-    <p><span data-l="en">This site has no cookies or counters. The download button asks GitHub's API for the newest file, and the language you pick is remembered in your browser only. NOVA Island is not affiliated with Apple; Dynamic Island is a trademark of Apple Inc. Third-party licenses are inside every Setup.zip.</span><span data-l="ru" lang="ru">На этом сайте нет cookie и счётчиков. Кнопка скачивания спрашивает у GitHub API последний файл, а выбранный язык запоминается только в вашем браузере. NOVA Island не связана с Apple; Dynamic Island — товарный знак Apple Inc. Лицензии сторонних компонентов лежат в каждом Setup.zip.</span></p>
+    <div class="links">
+      <a class="link" href="https://github.com/ZawkyQ/nova-island-releases/releases"><span data-l="en">All releases on GitHub</span><span data-l="ru" lang="ru">Все выпуски на GitHub</span></a>
+      <a class="link" href="https://t.me/killuez"><span data-l="en">Telegram (in Russian)</span><span data-l="ru" lang="ru">Telegram</span></a>
+      <a class="link" href="https://github.com/ZawkyQ/nova-island-releases/issues/new"><span data-l="en">Report a bug (GitHub account)</span><span data-l="ru" lang="ru">Сообщить об ошибке (нужен GitHub)</span></a>
+      <a class="link keep-lang" href="privacy.html"><span data-l="en">Privacy policy</span><span data-l="ru" lang="ru">Конфиденциальность</span></a>
+    </div>
   </div>
+  <div class="legal">
+    <span><span data-l="en">No cookies or counters here; the download button asks GitHub's API for the newest file, and your language choice stays in your browser.</span><span data-l="ru" lang="ru">Здесь нет cookie и счётчиков; кнопка скачивания спрашивает у GitHub API последний файл, а выбранный язык хранится только в вашем браузере.</span></span>
+    <span><span data-l="en">Dynamic Island is a trademark of Apple Inc.; NOVA Island is not affiliated with Apple. Licenses are inside every Setup.zip.</span><span data-l="ru" lang="ru">Dynamic Island — товарный знак Apple Inc.; NOVA Island не связана с Apple. Лицензии — в каждом Setup.zip.</span></span>
+  </div>
+  <div class="name" aria-hidden="true">NOVA Island</div>
 </footer>
 
 <script>
 (function () {
   var root = document.documentElement;
-  var titles = {
-    en: 'NOVA Island — a Dynamic Island–style capsule for Windows 11',
-    ru: 'NOVA Island — остров в стиле Dynamic Island для Windows 11'
-  };
-  var langButton = document.getElementById('lang');
-  var playButton = document.getElementById('play');
-  var video = document.getElementById('hero');
-  var icons = {
-    pause: '<svg viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>',
-    play: '<svg viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><path d="M3 1.5v11a.8.8 0 0 0 1.2.7l9-5.5a.8.8 0 0 0 0-1.4l-9-5.5A.8.8 0 0 0 3 1.5z"/></svg>'
-  };
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var lang = root.getAttribute('data-lang') === 'ru' ? 'ru' : 'en';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
 
-  function labelPlay() {
-    var playing = !video.paused;
-    playButton.innerHTML = playing ? icons.pause : icons.play;
-    playButton.setAttribute('aria-label', lang === 'ru' ? (playing ? 'Пауза видео' : 'Воспроизвести видео') : (playing ? 'Pause the video' : 'Play the video'));
-  }
-
-  function apply(l, remember) {
+  // ---- Language -------------------------------------------------------------------------------------------
+  var titles = { en: 'NOVA Island — a Dynamic Island–style capsule for Windows 11', ru: 'NOVA Island — остров в стиле Dynamic Island для Windows 11' };
+  var langButton = $('#lang');
+  function applyLang(l, remember) {
     lang = l;
-    root.setAttribute('data-lang', l);
-    root.setAttribute('lang', l);
+    root.setAttribute('data-lang', l); root.setAttribute('lang', l);
     document.title = titles[l];
     langButton.textContent = l === 'ru' ? 'EN' : 'RU';
     langButton.setAttribute('aria-label', l === 'ru' ? 'EN — switch to English' : 'RU — переключить на русский');
-    video.setAttribute('aria-label', l === 'ru' ? 'Капсула раскрывается в плеер, потом показывает текст песни' : 'The capsule opens into a music player, then shows synced lyrics');
-    var links = document.querySelectorAll('a.keep-lang');
-    for (var i = 0; i < links.length; i++) { links[i].setAttribute('href', 'privacy.html?lang=' + l); }
+    $$('a.keep-lang').forEach(function (a) { a.setAttribute('href', 'privacy.html?lang=' + l); });
     if (remember) {
       try { localStorage.setItem('nova-lang', l); } catch (e) {}
       if (new URLSearchParams(location.search).has('lang')) { history.replaceState(null, '', '?lang=' + l + location.hash); }
     }
-    labelPlay();
+    labelReel();
+    paint();
+  }
+  langButton.addEventListener('click', function () { applyLang(lang === 'ru' ? 'en' : 'ru', true); });
+
+  // ---- The demo track: made-up song with its own lyrics, one line every 3.6 s (like NOVA's synthetic test track) ----
+  var demoLines = ['City lights are humming low', 'static on the radio', 'every signal finds a way', 'back to you at the end of day',
+    'Midnight, hold the frequency', "midnight, you're the song in me", 'turn it up and let it glow', 'only the island seems to know'];
+  var dock = document.getElementById('dock');
+  var song = { title: 'Midnight Static', artist: 'Vera Nox', demo: true, length: 243 };
+  var playing = !reduce, started = performance.now(), pausedAt = 0;
+  function position() { return ((playing ? performance.now() - started : pausedAt) / 1000) % song.length; }
+  function hue(text) { var h = 0; for (var i = 0; i < text.length; i++) { h = (h * 31 + text.charCodeAt(i)) >>> 0; } return h % 360; }
+  function paint() {
+    var key = song.title + song.artist, h = song.demo ? 262 : hue(key);
+    var cover = 'hsl(' + h + ' 55% 48%)', accent = 'hsl(' + h + ' 90% 74%)';
+    $$('.cap, .player').forEach(function (el) { el.style.setProperty('--cover', cover); el.style.setProperty('--cap-accent', accent); });
+    $$('.song-title').forEach(function (el) { el.textContent = song.title; });
+    $$('.song-artist').forEach(function (el) { el.textContent = song.artist; });
+    $$('.song-source').forEach(function (el) { el.textContent = song.demo ? 'Demo' : (lang === 'ru' ? 'Ваш плеер' : 'Your player'); });
+    lastLine = -2;
+  }
+  var lastLine = -2;
+  function lineAt(t) { return song.demo ? Math.floor(t / 3.6) % demoLines.length : -1; }
+  function setLine(t) {
+    var i = lineAt(t);
+    if (i === lastLine) { return; }
+    lastLine = i;
+    var text = i < 0 ? song.title + (song.artist ? ' — ' + song.artist : '') : demoLines[i];
+    $$('.lyric-text').forEach(function (el) {
+      if (dock.contains(el) && dock.classList.contains('is-download')) { return; }
+      var t = i < 0 && el.closest('.player') ? '' : text;
+      if (reduce) { el.textContent = t; return; }
+      el.classList.add('out');
+      setTimeout(function () { el.textContent = t; el.classList.remove('out'); }, 200);
+    });
+  }
+  function fmt(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); }
+
+  // Spectrum: a made-up beat (kick, chord and hat), like the test island's synthetic sound; frozen under reduced motion.
+  var bars = $$('.bars i');
+  function frame(now) {
+    var t = position();
+    setLine(t);
+    var beat = (t * 1.95) % 1, kick = Math.exp(-beat * 7), wob = now / 1000;
+    for (var i = 0; i < bars.length; i++) {
+      var k = i % 4;
+      var v = k === 0 ? 0.28 + 0.72 * kick : k === 1 ? 0.35 + 0.35 * Math.abs(Math.sin(wob * 2.3 + i)) + 0.25 * kick
+        : k === 2 ? 0.3 + 0.45 * Math.abs(Math.sin(wob * 3.1 + i * 0.7)) : 0.22 + 0.5 * Math.abs(Math.sin(wob * 7.7 + i * 1.3)) * (1 - kick * 0.4);
+      bars[i].style.transform = 'scaleY(' + (playing ? v : 0.25).toFixed(3) + ')';
+    }
+    $$('.player').forEach(function (p) {
+      var pos = $('.pos', p), left = $('.left', p), fill = $('.track b', p);
+      if (pos) { pos.textContent = fmt(t); left.textContent = '−' + fmt(song.length - t); fill.style.width = (t / song.length * 100).toFixed(2) + '%'; }
+    });
+    if (!document.hidden) { requestAnimationFrame(frame); } else { hiddenLoop = true; }
+  }
+  var hiddenLoop = false;
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && hiddenLoop) { hiddenLoop = false; requestAnimationFrame(frame); } });
+  function setPlaying(p) {
+    if (p === playing) { return; }
+    if (p) { started = performance.now() - pausedAt; } else { pausedAt = performance.now() - started; }
+    playing = p;
+    $$('.playpause').forEach(function (b) {
+      b.innerHTML = (p ? '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5v14l12-7z"/></svg>') + '<span class="vh">' + (p ? 'Pause' : 'Play') + '</span>';
+    });
+  }
+  $$('.playpause').forEach(function (b) { b.addEventListener('click', function () { setPlaying(!playing); }); });
+  if (reduce) { pausedAt = 18000; }
+  paint();
+  requestAnimationFrame(frame);
+  if (reduce) { setPlaying(false); }
+
+  // ---- A spring like the island's (critically under-damped, response ~0.5 s) ---------------------------------------
+  function spring(from, to, opts, onFrame, onDone) {
+    var response = opts.response || 0.5, damping = opts.damping == null ? 0.72 : opts.damping;
+    var k = Math.pow(2 * Math.PI / response, 2), c = 4 * Math.PI * damping / response;
+    var x = from, v = opts.velocity || 0, last = performance.now(), id = 0;
+    function step(now) {
+      var dt = Math.min(0.032, (now - last) / 1000); last = now;
+      var a = -k * (x - to) - c * v; v += a * dt; x += v * dt;
+      onFrame(x);
+      if (Math.abs(x - to) < 0.0005 && Math.abs(v) < 0.001) { onFrame(to); if (onDone) { onDone(); } return; }
+      id = requestAnimationFrame(step);
+    }
+    id = requestAnimationFrame(step);
+    return function () { cancelAnimationFrame(id); };
   }
 
-  apply(lang, false);
-  langButton.addEventListener('click', function () { apply(lang === 'ru' ? 'en' : 'ru', true); });
+  // ---- The sentence fills the measure exactly, whatever face the visitor's system has --------------------------------
+  var sentence = $('.sentence');
+  function fit() {
+    sentence.style.fontSize = '';
+    var fs = parseFloat(getComputedStyle(sentence).fontSize), left = sentence.getBoundingClientRect().left, right = left;
+    var phone = window.matchMedia('(max-width: 600px)').matches;
+    $$(phone ? '.word' : '.ln:first-child .word, .ln:first-child .slot', sentence).forEach(function (c) { var r = c.getBoundingClientRect(); if (r.width) { right = Math.max(right, r.right); } });
+    var avail = sentence.getBoundingClientRect().width, used = right - left;
+    if (used > 0) { sentence.style.fontSize = Math.min(216, fs * avail / used * 0.995).toFixed(2) + 'px'; }
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fit); }
 
-  // The demo plays by itself unless the visitor asked for less motion; the round button pauses it at any time.
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (!reduce.matches) { var p = video.play(); if (p && p.catch) { p.catch(function () {}); } }
-  video.addEventListener('play', labelPlay);
-  video.addEventListener('pause', labelPlay);
-  playButton.addEventListener('click', function () { if (video.paused) { video.play(); } else { video.pause(); } });
-  labelPlay();
+  // ---- The hero capsule dives into the sentence, like NOVA's launch dive -----------------------------------------
+  var heroCap = $('#heroCap');
+  if (!reduce) {
+    var drop = heroCap.getBoundingClientRect().top + window.scrollY + heroCap.offsetHeight;
+    heroCap.style.transform = 'translateY(' + (-drop) + 'px) scaleX(1.25)';
+    setTimeout(function () {
+      spring(0, 1, { response: 0.62, damping: 0.58 }, function (p) {
+        var y = (1 - p) * -drop, sx = 1 + 0.25 * (1 - p) * (1 - p);
+        heroCap.style.transform = 'translateY(' + y.toFixed(1) + 'px) scaleX(' + sx.toFixed(3) + ')';
+      }, function () { heroCap.style.transform = ''; });
+    }, 520);
+  }
 
-  // The button downloads the newest Setup.zip directly (GitHub API); without the API it opens the release page.
-  var button = document.getElementById('download');
+  // ---- Click the capsule: it opens into the player (and closes again) ---------------------------------------------
+  var slot = $('#slot'), pop = $('#pop'), popOpen = false, stopPop = null;
+  function setPop(open) {
+    popOpen = open;
+    slot.setAttribute('aria-expanded', String(open));
+    pop.classList.toggle('open', open);
+    if (open) {
+      var r = slot.getBoundingClientRect(), w = pop.parentNode.getBoundingClientRect(), half = pop.offsetWidth / 2, m = 16;
+      var cx = Math.max(m + half, Math.min(window.innerWidth - m - half, r.left + r.width / 2));
+      pop.style.left = (cx - w.left) + 'px';
+      pop.style.top = (r.bottom - w.top + 16) + 'px';
+    }
+    if (stopPop) { stopPop(); }
+    if (reduce) { pop.style.opacity = open ? 1 : 0; pop.style.transform = ''; return; }
+    var from = open ? 0 : 1, to = open ? 1 : 0;
+    pop.classList.toggle('closing', !open);
+    stopPop = spring(from, to, { response: open ? 0.5 : 0.35, damping: open ? 0.74 : 1 }, function (p) {
+      var q = Math.max(0, Math.min(1.2, p));
+      pop.style.opacity = Math.min(1, q * 1.6).toFixed(3);
+      pop.style.transform = 'scale(' + (0.6 + 0.4 * q).toFixed(4) + ', ' + (0.2 + 0.8 * q).toFixed(4) + ')';
+    }, function () { pop.classList.remove('closing'); });
+  }
+  slot.addEventListener('click', function () { setPop(!popOpen); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && popOpen) { setPop(false); slot.focus(); } });
+  document.addEventListener('click', function (e) { if (popOpen && !pop.contains(e.target) && !slot.contains(e.target)) { setPop(false); } });
+
+  // ---- Type your song: every capsule on the page shows it ---------------------------------------------------------
+  var input = $('#song');
+  function readSong() {
+    var raw = input.value.trim();
+    if (!raw) { song = { title: 'Midnight Static', artist: 'Vera Nox', demo: true, length: 243 }; paint(); return; }
+    var parts = raw.split(/\s+[—–-]\s+/);
+    var title = parts[0], artist = parts.slice(1).join(' — ');
+    var demo = title.toLowerCase() === 'midnight static' && artist.toLowerCase() === 'vera nox';
+    song = { title: title, artist: artist, demo: demo, length: demo ? 243 : 180 + (hue(raw) % 90) };
+    paint();
+  }
+  var measure = document.createElement('span');
+  measure.setAttribute('aria-hidden', 'true');
+  measure.style.cssText = 'position:absolute;left:-9999px;top:0;white-space:pre;visibility:hidden';
+  document.body.appendChild(measure);
+  var line = $('.typeline');
+  function fitType() {
+    line.style.fontSize = '';
+    var cs = getComputedStyle(line), max = parseFloat(cs.fontSize);
+    measure.style.font = cs.font; measure.style.fontStretch = cs.fontStretch; measure.style.textTransform = 'uppercase'; measure.style.letterSpacing = cs.letterSpacing;
+    measure.textContent = input.value || ' ';
+    var w = measure.getBoundingClientRect().width, avail = line.getBoundingClientRect().width - 8;
+    if (w > avail) { line.style.fontSize = Math.max(18, max * avail / w).toFixed(1) + 'px'; }
+  }
+  input.addEventListener('input', function () { readSong(); fitType(); });
+  window.addEventListener('resize', fitType);
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fitType); }
+  fitType();
+  $$('[data-song]').forEach(function (b) { b.addEventListener('click', function () { input.value = b.getAttribute('data-song'); readSong(); fitType(); input.focus(); }); });
+
+  // ---- The docked island: when the hero capsule leaves, it dives into the top of the window -----------------------
+  var docked = false, stopDock = null;
+  function setDock(on) {
+    if (on === docked) { return; }
+    docked = on;
+    dock.style.pointerEvents = on ? 'auto' : 'none';
+    dock.tabIndex = on ? 0 : -1;
+    if (stopDock) { stopDock(); }
+    if (on) { dock.classList.add('shown'); }
+    if (reduce) { dock.style.opacity = on ? 1 : 0; dock.classList.toggle('shown', on); return; }
+    stopDock = spring(on ? 0 : 1, on ? 1 : 0, { response: on ? 0.55 : 0.3, damping: on ? 0.6 : 1 }, function (p) {
+      dock.style.opacity = Math.max(0, Math.min(1, p * 1.4)).toFixed(3);
+      dock.style.transform = 'translateY(' + ((1 - p) * -70).toFixed(1) + 'px) scaleX(' + (1 + 0.2 * (1 - p) * (1 - p)).toFixed(3) + ')';
+    }, function () { if (!docked) { dock.classList.remove('shown'); } });
+  }
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) {
+      es.forEach(function (e) { setDock(!e.isIntersecting && e.boundingClientRect.top < 0); });
+    }).observe(slot);
+    // Near the install steps and the end, the docked island turns into a download banner, like NOVA's own.
+    var dlZones = [$('#install'), $('footer')], inZone = new Set();
+    var zo = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { inZone.add(e.target); } else { inZone.delete(e.target); } });
+      var dl = inZone.size > 0;
+      dock.classList.toggle('is-download', dl);
+      dock.href = dl ? downloadUrl : '#top';
+      dock.setAttribute('aria-label', dl ? (lang === 'ru' ? 'Скачать NOVA Island' : 'Download NOVA Island') : 'NOVA Island');
+      if (dl) { $('.line', dock).firstElementChild.textContent = dlLabel(); }
+      lastLine = -2;
+    }, { threshold: 0.25 });
+    dlZones.forEach(function (z) { zo.observe(z); });
+  }
+  function dlLabel() { return (zipName || 'NovaIsland-Setup.zip') + (zipMb ? ' · ' + zipMb + (lang === 'ru' ? ' МБ' : ' MB') : ''); }
+
+  // ---- Watch it open: the real recording, opened by the shutter, pausable -----------------------------------------
+  var reel = $('#reel'), reelBtn = $('#reelBtn');
+  function labelReel() {
+    var on = !reel.paused;
+    reelBtn.innerHTML = on ? '<svg viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>'
+      : '<svg viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><path d="M3 1.5v11l9.5-5.5z"/></svg>';
+    reelBtn.setAttribute('aria-label', lang === 'ru' ? (on ? 'Пауза видео' : 'Воспроизвести видео') : (on ? 'Pause the video' : 'Play the video'));
+  }
+  reel.addEventListener('play', labelReel); reel.addEventListener('pause', labelReel);
+  reelBtn.addEventListener('click', function () { if (reel.paused) { reel.play(); } else { reel.pause(); } });
+
+  // ---- Entrances, once ---------------------------------------------------------------------------------------------
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) { return; }
+        e.target.classList.add('is-in');
+        if (e.target.id === 'reelFrame' && !reduce) { var p = reel.play(); if (p && p.catch) { p.catch(function () {}); } }
+        io.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px 8% 0px', threshold: 0.05 });
+    $$('[data-reveal], .shutter').forEach(function (el) { io.observe(el); });
+  } else {
+    $$('[data-reveal], .shutter').forEach(function (el) { el.classList.add('is-in'); });
+  }
+
+  // ---- Install: drag through the stages ----------------------------------------------------------------------------
+  var range = $('#stage'), dive = $('#dive');
+  function setStage(s) {
+    s = Number(s);
+    range.value = s;
+    document.getElementById('rail').style.setProperty('--p', (s / 3 * 100) + '%');
+    $$('#install .st').forEach(function (el) { el.hidden = Number(el.getAttribute('data-s')) !== s; });
+    $$('.stage').forEach(function (el) { el.classList.toggle('on', Number(el.getAttribute('data-s')) === s); });
+    $$('.names button').forEach(function (b) { b.classList.toggle('on', Number(b.getAttribute('data-go')) === s); });
+    if (s === 3) { dive.currentTime = 0; var p = dive.play(); if (p && p.catch) { p.catch(function () {}); } }
+  }
+  range.addEventListener('input', function () { setStage(range.value); });
+  $$('.names button').forEach(function (b) { b.addEventListener('click', function () { setStage(b.getAttribute('data-go')); }); });
+  $('#replay').addEventListener('click', function () { dive.currentTime = 0; dive.play(); });
+  setStage(0);
+
+  // ---- Download: the newest Setup.zip straight from GitHub (the API), or the release page ---------------------------
+  var downloadUrl = 'https://github.com/ZawkyQ/nova-island-releases/releases/latest', zipName = '', zipMb = 0;
   fetch('https://api.github.com/repos/ZawkyQ/nova-island-releases/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (release) {
       if (!release || !release.assets) { return; }
       var zip = release.assets.filter(function (a) { return /-Setup\.zip$/i.test(a.name); })[0];
       if (!zip || !/^https:\/\/github\.com\/ZawkyQ\/nova-island-releases\/releases\/download\//.test(zip.browser_download_url)) { return; }
-      button.href = zip.browser_download_url;
+      downloadUrl = zip.browser_download_url;
+      zipName = String(zip.name).replace(/[^0-9A-Za-z.\-]/g, '');
+      zipMb = Math.round(Number(zip.size) / 1048576) || 0;
+      $$('.dl-link').forEach(function (a) { a.href = downloadUrl; });
       var v = String(release.tag_name || '').replace(/^v/, '').replace(/[^0-9A-Za-z.\-]/g, '');
-      var mb = Math.round(Number(zip.size) / 1048576) || 0;
-      var spans = document.querySelectorAll('.ver');
-      for (var i = 0; i < spans.length; i++) {
-        var ru = spans[i].parentNode.getAttribute('data-l') === 'ru';
-        spans[i].textContent = ' · v' + v + (mb ? ' · ' + mb + (ru ? ' МБ' : ' MB') : '');
-      }
+      $$('.ver').forEach(function (el) { var ru = el.parentNode.getAttribute('data-l') === 'ru'; el.textContent = ' · v' + v + (zipMb ? ' · ' + zipMb + (ru ? ' МБ' : ' MB') : ''); });
+      $$('.stage .file b').forEach(function (el) { el.textContent = zipName; });
+      if (dock.classList.contains('is-download')) { dock.href = downloadUrl; $('.line', dock).firstElementChild.textContent = dlLabel(); }
     })
     .catch(function () {});
-  button.addEventListener('click', function () {
-    // After the download starts, show the next steps.
-    setTimeout(function () {
-      document.getElementById('install').scrollIntoView();
-      var steps = document.getElementById('steps');
-      steps.classList.remove('flash'); void steps.offsetWidth; steps.classList.add('flash');
-    }, 400);
-  });
+
+  applyLang(lang, false);
 })();
 </script>
 </body>
