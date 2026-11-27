@@ -30,11 +30,15 @@ Real screenshots of NOVA Island; the track and the lyrics are made up for the de
 
 Also inside:
 - **GIFs and videos** as the player's background, **9 themes** plus your own, and **profiles** you can send to a friend as one file (with GIFs and videos up to 32 MB each).
-- **Offline voice assistant** (whisper.cpp on your PC, Russian and English) and **hotkeys**.
+- **Offline voice assistant** (whisper.cpp on your PC, Russian and English); if it didn't hear you, it says why (for example, the microphone is silent).
+- **Hotkeys**, any key will do (single keys after a warning), and a tray switch for the lyric line in the capsule.
+- **Banners** for new screenshots and finished downloads, with Open and Show in folder.
+- **Motion:** NOVA dives in from the top of the screen when it starts, and the capsule pulses to the beat.
 - **Games:** in full-screen apps the island fades back or hides, as you choose; a hotkey or your voice still brings it up.
-- **Discord status** like Spotify's: cover, progress, player and buttons.
+- **Discord status** like Spotify's: cover, progress, player and the buttons “Listen on …” and “Get NOVA Island”.
 - **Gestures on the small capsule:** scroll for volume, Shift+scroll to skip forward or back, middle-click to play or pause.
-- **Light:** in our earlier tests it used about 0.01–0.04% of the CPU at idle.
+- **Ready out of the box:** the Aurora Soft look (a soft halo and gradient panels), start with Windows and free hotkeys.
+- **Light:** about 0.01–0.04% of the CPU at idle, measured on version 0.10 (not re-measured since video backgrounds and the spectrum were added).
 - English and Russian interface.
 
 ## Install
