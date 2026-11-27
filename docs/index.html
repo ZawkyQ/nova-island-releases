@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOVA Island — a Dynamic Island–style capsule for Windows 11</title>
+<script>
+// Language before the first paint: ?lang=, then the visitor's choice, then the browser language.
+(function () {
+  var l = new URLSearchParams(location.search).get('lang');
+  if (l !== 'ru' && l !== 'en') { try { l = localStorage.getItem('nova-lang'); } catch (e) { l = null; } }
+  if (l !== 'ru' && l !== 'en') { l = (navigator.language || '').toLowerCase().indexOf('ru') === 0 ? 'ru' : 'en'; }
+  document.documentElement.setAttribute('data-lang', l);
+  document.documentElement.setAttribute('lang', l);
+})();
+</script>
+<meta name="description" content="Free Dynamic Island–style capsule for Windows 11: a player for any app, synced lyrics, GIF backgrounds, notifications, offline voice. Бесплатный остров в стиле Dynamic Island («динамический остров») для Windows 11: плеер, текст песни, гифки, уведомления.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NOVA Island — a Dynamic Island–style capsule for Windows 11">
+<meta property="og:description" content="Music, synced lyrics and notifications at the top of your screen. Free. · Музыка, текст песни и уведомления сверху экрана. Бесплатно.">
+<meta property="og:image" content="https://zawkyq.github.io/nova-island-releases/assets/social.png">
+<meta property="og:url" content="https://zawkyq.github.io/nova-island-releases/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="color-scheme" content="dark">
+<style>
+:root {
+  --bg: #090a16; --panel: rgba(255,255,255,.045); --line: rgba(255,255,255,.09);
+  --text: #f2f1fb; --muted: #a9a8c4; --dim: #7d7c99;
+  --accent: #8b6cff; --accent2: #4fa3ff; --radius: 22px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html[data-lang="en"] [data-l="ru"], html[data-lang="ru"] [data-l="en"] { display: none !important; }
+body {
+  margin: 0; color: var(--text); background: var(--bg);
+  font: 16px/1.6 "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60vw 50vh at 12% 95%, rgba(124,58,237,.35), transparent 70%),
+    radial-gradient(50vw 45vh at 90% 80%, rgba(37,140,235,.28), transparent 70%),
+    radial-gradient(45vw 40vh at 55% 120%, rgba(225,70,170,.22), transparent 70%),
+    radial-gradient(40vw 35vh at 95% 0%, rgba(30,80,160,.25), transparent 70%);
+}
+a { color: inherit; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(16px) saturate(160%); background: rgba(9,10,22,.6); border-bottom: 1px solid var(--line); }
+header .wrap { display: flex; align-items: center; gap: 20px; height: 60px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 650; text-decoration: none; letter-spacing: -.01em; }
+.brand img { width: 30px; height: 30px; }
+nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
+nav a { text-decoration: none; color: var(--muted); }
+nav a:hover { color: var(--text); }
+.lang { border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.lang:hover { background: rgba(255,255,255,.09); }
+:focus-visible { outline: 2px solid var(--accent2); outline-offset: 3px; border-radius: 8px; }
+section, #top { scroll-margin-top: 76px; }
+
+.hero { padding: 72px 0 40px; display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+h1 { font-size: clamp(2.2rem, 4.6vw, 3.6rem); line-height: 1.05; letter-spacing: -.025em; margin: 0 0 18px; font-weight: 750; }
+h1 .grad { background: linear-gradient(90deg, #a78bfa, #60a5fa 60%, #f472b6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nowrap { white-space: nowrap; }
+.lead { font-size: 1.15rem; color: var(--muted); margin: 0 0 30px; max-width: 34em; }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 650; font-size: 1.05rem;
+  padding: 15px 26px; border-radius: 999px; color: #fff;
+  background: linear-gradient(135deg, #7c5cff, #4f8dff); box-shadow: 0 10px 30px -10px rgba(124,92,255,.8), inset 0 1px 0 rgba(255,255,255,.25);
+  transition: transform .12s ease, box-shadow .2s ease;
+}
+.btn:hover { box-shadow: 0 14px 36px -10px rgba(124,92,255,.95), inset 0 1px 0 rgba(255,255,255,.25); }
+.btn:active { transform: scale(.97); }
+.btn svg { width: 20px; height: 20px; }
+.meta { font-size: 13.5px; color: var(--dim); }
+.link { color: var(--muted); font-size: 14.5px; }
+
+.shot { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: #0d0e1d; box-shadow: 0 30px 80px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.3); }
+.shot video, .shot img { display: block; width: 100%; height: auto; }
+.play { position: absolute; right: 12px; bottom: 12px; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18);
+  background: rgba(10,10,24,.65); color: #fff; display: grid; place-items: center; cursor: pointer; backdrop-filter: blur(8px); }
+.play svg { width: 14px; height: 14px; }
+.play:hover { background: rgba(30,30,60,.8); }
+
+section { padding: 56px 0; }
+h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -.02em; line-height: 1.15; margin: 0 0 10px; }
+.sub { color: var(--muted); margin: 0 0 34px; max-width: 42em; }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.card img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--line); }
+.card .body { padding: 18px 22px 22px; }
+.card h3 { margin: 0 0 6px; font-size: 1.1rem; letter-spacing: -.01em; }
+.card p { margin: 0; color: var(--muted); font-size: 15px; }
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 22px; }
+.chip { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; font-size: 14.5px; color: var(--muted); }
+.chip b { display: block; color: var(--text); font-size: 15px; margin-bottom: 2px; }
+
+.steps { counter-reset: s; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 0 0 18px; padding: 0; list-style: none; }
+.steps li { counter-increment: s; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; color: var(--muted); font-size: 15px; }
+.steps li::before { content: counter(s); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; margin-bottom: 12px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #7c5cff, #4f8dff); }
+.steps b { color: var(--text); }
+.steps.flash li { animation: flash 1.2s ease 2; }
+@keyframes flash { 50% { border-color: rgba(139,108,255,.8); box-shadow: 0 0 0 4px rgba(139,108,255,.18); } }
+@media (prefers-reduced-motion: reduce) { .steps.flash li { animation: none; border-color: rgba(139,108,255,.8); } }
+.note { color: var(--muted); font-size: 15px; margin: 0 0 12px; }
+.note b { color: var(--text); }
+.notes { margin: 0 0 26px; }
+details { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 4px 20px; margin-bottom: 12px; }
+summary { cursor: pointer; font-weight: 600; padding: 14px 0; list-style: none; display: flex; align-items: center; gap: 10px; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: ""; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .15s ease; flex: none; }
+details[open] summary::before { transform: rotate(45deg); }
+details[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+details p, details ul { color: var(--muted); font-size: 15px; }
+code { font-family: "Cascadia Code", Consolas, monospace; font-size: .88em; background: rgba(255,255,255,.07); padding: 2px 6px; border-radius: 6px; white-space: nowrap; }
+code.any { white-space: normal; overflow-wrap: anywhere; }
+pre { background: rgba(0,0,0,.35); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--dim); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+td { color: var(--muted); }
+td:first-child { color: var(--text); }
+.tablebox { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 10px; overflow-x: auto; }
+.never { margin-top: 18px; color: var(--muted); font-size: 15px; }
+.never b { color: var(--text); }
+
+footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 30px 0 50px; color: var(--dim); font-size: 13.5px; }
+footer .row { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-bottom: 12px; }
+footer a { color: var(--muted); }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; padding-top: 44px; gap: 32px; }
+  .grid, .steps { grid-template-columns: 1fr; }
+  .chips { grid-template-columns: 1fr 1fr; }
+  nav { display: none; }
+  .lang { margin-left: auto; }
+}
+@media (max-width: 520px) { .chips { grid-template-columns: 1fr; } }
+@media (max-width: 640px) {
+  .tablebox { padding: 4px 16px; }
+  table, tbody, tr, td { display: block; }
+  thead { display: none; }
+  tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  tr:last-child { border-bottom: 0; }
+  td { border: 0; padding: 2px 0; }
+  td:first-child { font-weight: 600; margin-bottom: 4px; }
+  td:nth-child(2)::before { content: "→ "; color: var(--dim); }
+  td:nth-child(3) { font-size: 13.5px; color: var(--dim); }
+  td:nth-child(4)::before { content: "⚙ "; color: var(--dim); }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/logo.png" alt="" width="30" height="30">NOVA Island</a>
+    <nav aria-label="Sections">
+      <a href="#features"><span data-l="en">Features</span><span data-l="ru" lang="ru">Возможности</span></a>
+      <a href="#install"><span data-l="en">Install</span><span data-l="ru" lang="ru">Установка</span></a>
+      <a href="#privacy"><span data-l="en">Privacy</span><span data-l="ru" lang="ru">Приватность</span></a>
+      <a href="https://github.com/ZawkyQ/nova-island-releases">GitHub</a>
+    </nav>
+    <button class="lang" id="lang" type="button">RU</button>
+  </div>
+</header>
+
+<main id="top" class="wrap">
+  <div class="hero">
+    <div>
+      <h1>
+        <span data-l="en">A <span class="nowrap">Dynamic Island–style</span> <span class="grad">capsule</span> for Windows&nbsp;11</span>
+        <span data-l="ru" lang="ru"><span class="grad">Остров</span> в стиле <span class="nowrap">Dynamic Island</span> для Windows&nbsp;11</span>
+      </h1>
+      <p class="lead">
+        <span data-l="en">Your music, synced lyrics, notifications and a system center live in a small capsule at the top of the screen and smoothly open up. Free, light, and it works with any player Windows sees.</span>
+        <span data-l="ru" lang="ru">Музыка, текст песни, уведомления и системный центр живут в маленькой капсуле сверху экрана и плавно раскрываются. Бесплатно, не грузит ПК и работает с любым плеером, который видит Windows.</span>
+      </p>
+      <div class="cta">
+        <a class="btn" id="download" href="https://github.com/ZawkyQ/nova-island-releases/releases/latest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+          <span data-l="en">Download for Windows 11</span><span data-l="ru" lang="ru">Скачать для Windows 11</span>
+        </a>
+        <a class="link" href="#install"><span data-l="en">How to install</span><span data-l="ru" lang="ru">Как установить</span></a>
+      </div>
+      <p class="meta">
+        <span data-l="en">Free · Windows 11 x64<span class="ver"></span> · English and Russian</span><span data-l="ru" lang="ru">Бесплатно · Windows 11 x64<span class="ver"></span> · русский и английский</span>
+      </p>
+    </div>
+    <div class="shot">
+      <video id="hero" src="assets/hero.mp4" poster="assets/poster.jpg" width="600" height="340" muted loop playsinline preload="auto"></video>
+      <button class="play" id="play" type="button"></button>
+    </div>
+  </div>
+
+  <section id="features">
+    <h2><span data-l="en">Everything at the top of your screen</span><span data-l="ru" lang="ru">Всё — сверху экрана</span></h2>
+    <p class="sub"><span data-l="en">Real screenshots of NOVA Island. The track and the lyrics are made up for the demo.</span><span data-l="ru" lang="ru">Настоящие снимки NOVA Island. Трек и текст придуманы для показа.</span></p>
+    <div class="grid">
+      <div class="card">
+        <img src="assets/player.png" width="600" height="340" loading="lazy" alt="NOVA Island player · плеер NOVA Island">
+        <div class="body">
+          <h3><span data-l="en">A player for any app</span><span data-l="ru" lang="ru">Плеер для любого приложения</span></h3>
+          <p><span data-l="en">Spotify, Yandex Music, browsers and more. Drag to seek, shuffle and repeat (where the player supports them), the player's own volume (or the Windows volume if the player has no sound of its own), and an equalizer that follows the real sound.</span><span data-l="ru" lang="ru">Spotify, Яндекс Музыка, браузеры и другие. Перемотка перетаскиванием, перемешивание и повтор (если плеер их даёт), громкость самого плеера (или громкость Windows, если у плеера нет своего звука) и эквалайзер по настоящему звуку.</span></p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="assets/lyrics.png" width="600" height="340" loading="lazy" alt="Synced lyrics · синхронный текст песни">
+        <div class="body">
+          <h3><span data-l="en">Synced lyrics</span><span data-l="ru" lang="ru">Синхронный текст песни</span></h3>
+          <p><span data-l="en">From your own .lrc files or LRCLIB. Lines move only by real timestamps, never guessed. A lyric line can sit right in the small capsule.</span><span data-l="ru" lang="ru">Из ваших файлов .lrc или с LRCLIB. Строки сменяются только по настоящим временным меткам, ничего не угадывается. Строку текста можно показывать прямо в маленькой капсуле.</span></p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="assets/more.png" width="600" height="340" loading="lazy" alt="Sleep timer · таймер сна">
+        <div class="body">
+          <h3><span data-l="en">Sleep timer and more</span><span data-l="ru" lang="ru">Таймер сна и не только</span></h3>
+          <p><span data-l="en">Pause in 15, 30, 60 minutes or at the end of the track. Copy the title, find it on YouTube, switch between apps that are playing.</span><span data-l="ru" lang="ru">Пауза через 15, 30, 60 минут или в конце трека. Скопировать название, найти на YouTube, переключиться между играющими приложениями.</span></p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="assets/system.png" width="600" height="340" loading="lazy" alt="System center · системный центр">
+        <div class="body">
+          <h3><span data-l="en">System center and notifications</span><span data-l="ru" lang="ru">Системный центр и уведомления</span></h3>
+          <p><span data-l="en">Windows notifications on the island, with quiet hours and flood protection. Notification text is never stored.</span><span data-l="ru" lang="ru">Уведомления Windows на острове, тихие часы и защита от потока уведомлений. Их текст нигде не сохраняется.</span></p>
+        </div>
+      </div>
+    </div>
+    <div class="chips">
+      <div class="chip"><b><span data-l="en">GIFs as background</span><span data-l="ru" lang="ru">Гифки фоном</span></b><span data-l="en">GIFs and videos behind the player.</span><span data-l="ru" lang="ru">Гифки и видео за плеером.</span></div>
+      <div class="chip"><b><span data-l="en">9 themes and your own</span><span data-l="ru" lang="ru">9 тем и свои</span></b><span data-l="en">Send your whole island to a friend as one file, GIFs included.</span><span data-l="ru" lang="ru">Свой остров можно скинуть другу одним файлом вместе с гифками.</span></div>
+      <div class="chip"><b><span data-l="en">Offline voice</span><span data-l="ru" lang="ru">Голос без интернета</span></b><span data-l="en">whisper.cpp on your PC, Russian and English.</span><span data-l="ru" lang="ru">whisper.cpp на вашем ПК, русский и английский.</span></div>
+      <div class="chip"><b><span data-l="en">Games</span><span data-l="ru" lang="ru">Игры</span></b><span data-l="en">In full-screen apps the island fades back or hides.</span><span data-l="ru" lang="ru">В полноэкранных приложениях остров приглушается или прячется.</span></div>
+      <div class="chip"><b><span data-l="en">Discord status</span><span data-l="ru" lang="ru">Статус в Discord</span></b><span data-l="en">Cover, progress, player and buttons, like Spotify's.</span><span data-l="ru" lang="ru">Обложка, время, плеер и кнопки, как у Spotify.</span></div>
+      <div class="chip"><b><span data-l="en">Gestures</span><span data-l="ru" lang="ru">Жесты</span></b><span data-l="en">Scroll on the capsule for volume, Shift+scroll to skip, middle-click to play or pause.</span><span data-l="ru" lang="ru">Колёсико над капсулой — громкость, Shift+колёсико — трек, нажатие колёсика — пауза.</span></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2><span data-l="en">Install in a minute</span><span data-l="ru" lang="ru">Установка за минуту</span></h2>
+    <p class="sub"><span data-l="en">Windows 11, x64. .NET and the Windows App Runtime are inside. Windows 10 is not supported.</span><span data-l="ru" lang="ru">Windows 11, x64. .NET и Windows App Runtime уже внутри. Windows 10 не поддерживается.</span></p>
+    <ol class="steps" id="steps">
+      <li><span data-l="en"><b>Download</b> the single file <code>NovaIsland-…-Setup.zip</code>.</span><span data-l="ru" lang="ru"><b>Скачайте</b> один файл <code>NovaIsland-…-Setup.zip</code>.</span></li>
+      <li><span data-l="en">Right-click it → <b>Extract All</b>, then run <code>Install.cmd</code>.</span><span data-l="ru" lang="ru">Правой кнопкой → <b>«Извлечь все»</b>, затем запустите <code>Install.cmd</code>.</span></li>
+      <li><span data-l="en">Windows asks for administrator rights <b>once</b> (the prompt says “Windows PowerShell”): click <b>Yes</b>. NOVA installs and starts; press any key to close the black window.</span><span data-l="ru" lang="ru">Windows <b>один раз</b> попросит права администратора (в окне будет «Windows PowerShell»): нажмите <b>«Да»</b>. NOVA установится и запустится; потом нажмите любую клавишу, чтобы закрыть чёрное окно.</span></li>
+    </ol>
+    <div class="notes">
+      <p class="note"><span data-l="en">If Windows shows <b>“Windows protected your PC”</b>, click <b>More info → Run anyway</b>, but only for the file you downloaded from this page.</span><span data-l="ru" lang="ru">Если Windows покажет <b>«Система Windows защитила ваш компьютер»</b>, нажмите <b>«Подробнее» → «Выполнить в любом случае»</b>, но только для файла, скачанного с этой страницы.</span></p>
+      <p class="note"><span data-l="en">On first start NOVA turns on start with Windows and sets free hotkeys (both can be changed in Settings), and Windows asks once for the microphone and notifications.</span><span data-l="ru" lang="ru">При первом запуске NOVA включает автозапуск вместе с Windows и назначает свободные горячие клавиши (и то и другое меняется в настройках), а Windows один раз спросит про микрофон и уведомления.</span></p>
+      <p class="note"><span data-l="en">Voice assistant does not start? Install the <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe">Microsoft Visual C++ Redistributable (x64)</a> from Microsoft; many PCs already have it.</span><span data-l="ru" lang="ru">Не запускается голосовой ассистент? Установите <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe">Microsoft Visual C++ Redistributable (x64)</a> с сайта Microsoft; на многих ПК он уже есть.</span></p>
+    </div>
+    <details>
+      <summary><span data-l="en">Why does Windows warn me?</span><span data-l="ru" lang="ru">Почему Windows предупреждает?</span></summary>
+      <p data-l="en">NOVA Island is signed with its own certificate (<code>CN=NovaIsland Dev</code>), not a paid one, so Windows does not know the publisher yet and may say so. <code>Install.cmd</code> runs <code>Install.ps1</code> (you can read it) once, with PowerShell's script policy relaxed for that run only. The script adds the certificate to <b>Local Machine → Trusted People</b> (this is the admin prompt), removes an old developer build of NOVA if there is one (your settings stay), installs the <code>.msix</code> next to it (closing a running NOVA first) and starts NOVA. It does not turn off SmartScreen or your antivirus, and there is no need to.</p>
+      <p data-l="ru" lang="ru">NOVA Island подписана своим сертификатом (<code>CN=NovaIsland Dev</code>), а не платным, поэтому Windows пока не знает издателя и может об этом написать. <code>Install.cmd</code> один раз запускает <code>Install.ps1</code> (его можно прочитать), ослабив политику скриптов PowerShell только на этот запуск. Скрипт добавляет сертификат в <b>«Локальный компьютер → Доверенные лица»</b> (это и есть запрос прав администратора), удаляет старую сборку разработчика NOVA, если она есть (настройки остаются), ставит <code>.msix</code>, который лежит рядом (запущенную NOVA сначала закрывает), и запускает NOVA. Он не отключает SmartScreen и антивирус, и вам их отключать не нужно.</p>
+      <p><span data-l="en">Certificate thumbprint:</span><span data-l="ru" lang="ru">Отпечаток сертификата:</span> <code class="any">784A44CC9743B80100C95C3852142647B53DD8B3</code></p>
+    </details>
+    <details>
+      <summary><span data-l="en">How do I check the download?</span><span data-l="ru" lang="ru">Как проверить скачанный файл?</span></summary>
+      <p><span data-l="en">In PowerShell, in your Downloads folder, run</span><span data-l="ru" lang="ru">В PowerShell, в папке «Загрузки», выполните</span></p>
+      <pre><code>Get-FileHash .\NovaIsland-*-Setup.zip</code></pre>
+      <p><span data-l="en">and compare the result with <code>SHA256SUMS.txt</code> in the same release (upper or lower case does not matter).</span><span data-l="ru" lang="ru">и сравните результат с <code>SHA256SUMS.txt</code> в том же выпуске (регистр букв не важен).</span></p>
+    </details>
+    <details>
+      <summary><span data-l="en">The Install button of the .msix is grey</span><span data-l="ru" lang="ru">Кнопка «Установить» в .msix серая</span></summary>
+      <p><span data-l="en">Windows does not trust the certificate yet. Close that window and run <code>Install.cmd</code> from the Setup.zip instead.</span><span data-l="ru" lang="ru">Windows ещё не доверяет сертификату. Закройте это окно и запустите <code>Install.cmd</code> из Setup.zip.</span></p>
+    </details>
+    <details>
+      <summary><span data-l="en">How do updates work?</span><span data-l="ru" lang="ru">Как обновляться?</span></summary>
+      <p><span data-l="en">NOVA tells you when a new version is out. Click <b>Settings → About → Updates → Download and install</b>, then confirm in the Windows installer window that opens.</span><span data-l="ru" lang="ru">NOVA сама скажет о новой версии. Нажмите <b>«Настройки → О программе → Обновления → Скачать и установить»</b> и подтвердите установку в открывшемся окне Windows.</span></p>
+    </details>
+    <details>
+      <summary><span data-l="en">How do I uninstall it?</span><span data-l="ru" lang="ru">Как удалить?</span></summary>
+      <p><span data-l="en"><b>Settings → Apps → Installed apps → NOVA Island → Uninstall.</b> To also remove the certificate, run in an administrator PowerShell:</span><span data-l="ru" lang="ru"><b>«Параметры → Приложения → Установленные приложения → NOVA Island → Удалить».</b> Чтобы удалить и сертификат, выполните в PowerShell от имени администратора:</span></p>
+      <pre><code class="any">Remove-Item Cert:\LocalMachine\TrustedPeople\784A44CC9743B80100C95C3852142647B53DD8B3</code></pre>
+      <p><span data-l="en">Your settings, GIF library, logs and the voice model stay in <code>%LOCALAPPDATA%\NovaIsland</code>; delete that folder to remove them too.</span><span data-l="ru" lang="ru">Настройки, гифки, журналы и модель голоса остаются в папке <code>%LOCALAPPDATA%\NovaIsland</code>; удалите её, чтобы стереть и их.</span></p>
+    </details>
+    <details>
+      <summary><span data-l="en">Known limitations</span><span data-l="ru" lang="ru">Известные ограничения</span></summary>
+      <ul data-l="en">
+        <li>Over exclusive full-screen apps, Windows may not show the island.</li>
+        <li>Shuffle and repeat work only with players that report them to Windows (browsers do not). Windows gives apps no likes or queue.</li>
+        <li>Battery level is shown only for Bluetooth devices that report it to Windows.</li>
+        <li>Because the certificate is self-signed, SmartScreen may warn about an unknown publisher.</li>
+      </ul>
+      <ul data-l="ru" lang="ru">
+        <li>Поверх эксклюзивного полноэкранного режима Windows может не показать остров.</li>
+        <li>Перемешивание и повтор работают только у плееров, которые сообщают их Windows (браузеры не сообщают). Лайков и очереди Windows приложениям не даёт.</li>
+        <li>Заряд показывается только у Bluetooth-устройств, которые сообщают его Windows.</li>
+        <li>Сертификат самоподписанный, поэтому SmartScreen может предупредить о неизвестном издателе.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section id="privacy">
+    <h2><span data-l="en">What NOVA sends to the internet</span><span data-l="ru" lang="ru">Что NOVA отправляет в интернет</span></h2>
+    <p class="sub"><span data-l="en">NOVA itself has no ads, accounts, analytics or telemetry. This is everything it sends:</span><span data-l="ru" lang="ru">В самой NOVA нет рекламы, аккаунтов, аналитики и телеметрии. Вот всё, что она отправляет:</span></p>
+    <div class="tablebox">
+      <table>
+        <thead><tr>
+          <th><span data-l="en">What</span><span data-l="ru" lang="ru">Что</span></th>
+          <th><span data-l="en">Where</span><span data-l="ru" lang="ru">Куда</span></th>
+          <th><span data-l="en">When</span><span data-l="ru" lang="ru">Когда</span></th>
+          <th><span data-l="en">Turn off</span><span data-l="ru" lang="ru">Где выключить</span></th>
+        </tr></thead>
+        <tbody>
+          <tr><td><span data-l="en">Artist, title, album and length of the track (or the words you type in the manual search), to find lyrics</span><span data-l="ru" lang="ru">Исполнитель, название, альбом и длина трека (или слова, которые вы ввели в ручном поиске), чтобы найти текст</span></td><td>lrclib.net</td><td><span data-l="en">A track without a local .lrc or saved lyrics starts, or you search by hand</span><span data-l="ru" lang="ru">Начался трек без локального файла .lrc и без сохранённого текста, или вы ищете вручную</span></td><td><span data-l="en">Settings → Lyrics</span><span data-l="ru" lang="ru">Настройки → Тексты</span></td></tr>
+          <tr><td><span data-l="en">The voice model, once (~57 MB; ~31 MB if you pick Tiny)</span><span data-l="ru" lang="ru">Модель голоса, один раз (~57 МБ; ~31 МБ, если выбрать Tiny)</span></td><td><span data-l="en">huggingface.co and its file servers</span><span data-l="ru" lang="ru">huggingface.co и его файловые серверы</span></td><td><span data-l="en">While voice is on and the model is not on your PC yet (normally right after the first start)</span><span data-l="ru" lang="ru">Пока голос включён, а модели ещё нет на ПК (обычно сразу после первого запуска)</span></td><td><span data-l="en">Settings → Voice</span><span data-l="ru" lang="ru">Настройки → Голос</span></td></tr>
+          <tr><td><span data-l="en">Update check (and the download count in About)</span><span data-l="ru" lang="ru">Проверка обновлений (и счётчик скачиваний в «О программе»)</span></td><td><span data-l="en">api.github.com, the NOVA releases repository</span><span data-l="ru" lang="ru">api.github.com, репозиторий выпусков NOVA</span></td><td><span data-l="en">About a minute after start if “Check at start” is on (it is by default), and when you click “Check now”</span><span data-l="ru" lang="ru">Через минуту после запуска, если включено «Проверять при запуске» (включено по умолчанию), и по кнопке «Проверить сейчас»</span></td><td><span data-l="en">Settings → About → Updates</span><span data-l="ru" lang="ru">Настройки → О программе → Обновления</span></td></tr>
+          <tr><td><span data-l="en">The new version</span><span data-l="ru" lang="ru">Новая версия</span></td><td><span data-l="en">github.com and its download servers</span><span data-l="ru" lang="ru">github.com и его серверы загрузки</span></td><td><span data-l="en">Only when you click “Download and install”</span><span data-l="ru" lang="ru">Только по нажатию «Скачать и установить»</span></td><td>—</td></tr>
+          <tr><td><span data-l="en">Track, artist, album, player, progress, cover and buttons, shown in your Discord status to your friends and members of your servers</span><span data-l="ru" lang="ru">Трек, исполнитель, альбом, плеер, время, обложка и кнопки — их видят в вашем статусе Discord друзья и участники ваших серверов</span></td><td><span data-l="en">Discord, through the Discord app on your PC</span><span data-l="ru" lang="ru">Discord, через приложение Discord на вашем ПК</span></td><td><span data-l="en">While Discord is running</span><span data-l="ru" lang="ru">Пока запущен Discord</span></td><td><span data-l="en">Settings → Discord</span><span data-l="ru" lang="ru">Настройки → Discord</span></td></tr>
+          <tr><td><span data-l="en">Artist and title, to find a cover for the Discord status</span><span data-l="ru" lang="ru">Исполнитель и название, чтобы найти обложку для статуса Discord</span></td><td>itunes.apple.com, api.deezer.com</td><td><span data-l="en">Only while connected to Discord</span><span data-l="ru" lang="ru">Только пока есть связь с Discord</span></td><td><span data-l="en">Settings → Discord</span><span data-l="ru" lang="ru">Настройки → Discord</span></td></tr>
+          <tr><td><span data-l="en">Artist and title of the playing track, as a YouTube search</span><span data-l="ru" lang="ru">Исполнитель и название играющего трека как поиск на YouTube</span></td><td><span data-l="en">youtube.com, in your browser</span><span data-l="ru" lang="ru">youtube.com в браузере</span></td><td><span data-l="en">Only when you click “Find on YouTube”</span><span data-l="ru" lang="ru">Только по нажатию «Найти на YouTube»</span></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="never"><span data-l="en">Each of these requests carries the app's name and version and, like any connection, your IP address. Other links in the app open in your browser only when you click them. Windows and the bundled Windows App Runtime may send Microsoft diagnostic data, as your Windows privacy settings allow.</span><span data-l="ru" lang="ru">В каждом из этих запросов есть название и версия программы и, как при любом подключении, ваш IP-адрес. Другие ссылки в программе открываются в браузере только по нажатию. Windows и встроенный Windows App Runtime могут отправлять Microsoft диагностические данные, насколько это разрешают настройки конфиденциальности Windows.</span></p>
+    <p class="never"><span data-l="en"><b>Never sent by NOVA:</b> notification text; your voice (the microphone opens only while the island is listening to you, and speech is recognized on your PC); the sound for the equalizer (analysed in memory and dropped at once); your GIFs, themes, settings and logs. A profile you export holds all your settings and GIFs; NOVA never sends it, you choose who gets it.</span><span data-l="ru" lang="ru"><b>NOVA никуда не отправляет:</b> текст уведомлений; ваш голос (микрофон включается, только пока остров вас слушает, и речь распознаётся на вашем ПК); звук для эквалайзера (разбирается в памяти и сразу забывается); ваши гифки, темы, настройки и журналы. В экспортированном профиле лежат все ваши настройки и гифки; NOVA его никуда не отправляет, кому его дать, решаете вы.</span></p>
+    <p class="never"><a class="keep-lang" href="privacy.html"><span data-l="en">Full privacy policy</span><span data-l="ru" lang="ru">Политика конфиденциальности целиком</span></a></p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <a href="https://github.com/ZawkyQ/nova-island-releases/releases"><span data-l="en">All releases</span><span data-l="ru" lang="ru">Все выпуски</span></a>
+      <a href="https://github.com/ZawkyQ/nova-island-releases/issues/new"><span data-l="en">Report a bug (GitHub account)</span><span data-l="ru" lang="ru">Сообщить об ошибке (нужен GitHub)</span></a>
+      <a href="https://t.me/killuez"><span data-l="en">Telegram (in Russian)</span><span data-l="ru" lang="ru">Telegram</span></a>
+      <a class="keep-lang" href="privacy.html"><span data-l="en">Privacy</span><span data-l="ru" lang="ru">Конфиденциальность</span></a>
+    </div>
+    <p><span data-l="en">This site has no cookies or counters. The download button asks GitHub's API for the newest file, and the language you pick is remembered in your browser only. NOVA Island is not affiliated with Apple; Dynamic Island is a trademark of Apple Inc. Third-party licenses are inside every Setup.zip.</span><span data-l="ru" lang="ru">На этом сайте нет cookie и счётчиков. Кнопка скачивания спрашивает у GitHub API последний файл, а выбранный язык запоминается только в вашем браузере. NOVA Island не связана с Apple; Dynamic Island — товарный знак Apple Inc. Лицензии сторонних компонентов лежат в каждом Setup.zip.</span></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var titles = {
+    en: 'NOVA Island — a Dynamic Island–style capsule for Windows 11',
+    ru: 'NOVA Island — остров в стиле Dynamic Island для Windows 11'
+  };
+  var langButton = document.getElementById('lang');
+  var playButton = document.getElementById('play');
+  var video = document.getElementById('hero');
+  var icons = {
+    pause: '<svg viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><rect x="2" y="1" width="3.5" height="12" rx="1"/><rect x="8.5" y="1" width="3.5" height="12" rx="1"/></svg>',
+    play: '<svg viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><path d="M3 1.5v11a.8.8 0 0 0 1.2.7l9-5.5a.8.8 0 0 0 0-1.4l-9-5.5A.8.8 0 0 0 3 1.5z"/></svg>'
+  };
+  var lang = root.getAttribute('data-lang') === 'ru' ? 'ru' : 'en';
+
+  function labelPlay() {
+    var playing = !video.paused;
+    playButton.innerHTML = playing ? icons.pause : icons.play;
+    playButton.setAttribute('aria-label', lang === 'ru' ? (playing ? 'Пауза видео' : 'Воспроизвести видео') : (playing ? 'Pause the video' : 'Play the video'));
+  }
+
+  function apply(l, remember) {
+    lang = l;
+    root.setAttribute('data-lang', l);
+    root.setAttribute('lang', l);
+    document.title = titles[l];
+    langButton.textContent = l === 'ru' ? 'EN' : 'RU';
+    langButton.setAttribute('aria-label', l === 'ru' ? 'EN — switch to English' : 'RU — переключить на русский');
+    video.setAttribute('aria-label', l === 'ru' ? 'Капсула раскрывается в плеер, потом показывает текст песни' : 'The capsule opens into a music player, then shows synced lyrics');
+    var links = document.querySelectorAll('a.keep-lang');
+    for (var i = 0; i < links.length; i++) { links[i].setAttribute('href', 'privacy.html?lang=' + l); }
+    if (remember) {
+      try { localStorage.setItem('nova-lang', l); } catch (e) {}
+      if (new URLSearchParams(location.search).has('lang')) { history.replaceState(null, '', '?lang=' + l + location.hash); }
+    }
+    labelPlay();
+  }
+
+  apply(lang, false);
+  langButton.addEventListener('click', function () { apply(lang === 'ru' ? 'en' : 'ru', true); });
+
+  // The demo plays by itself unless the visitor asked for less motion; the round button pauses it at any time.
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (!reduce.matches) { var p = video.play(); if (p && p.catch) { p.catch(function () {}); } }
+  video.addEventListener('play', labelPlay);
+  video.addEventListener('pause', labelPlay);
+  playButton.addEventListener('click', function () { if (video.paused) { video.play(); } else { video.pause(); } });
+  labelPlay();
+
+  // The button downloads the newest Setup.zip directly (GitHub API); without the API it opens the release page.
+  var button = document.getElementById('download');
+  fetch('https://api.github.com/repos/ZawkyQ/nova-island-releases/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (release) {
+      if (!release || !release.assets) { return; }
+      var zip = release.assets.filter(function (a) { return /-Setup\.zip$/i.test(a.name); })[0];
+      if (!zip || !/^https:\/\/github\.com\/ZawkyQ\/nova-island-releases\/releases\/download\//.test(zip.browser_download_url)) { return; }
+      button.href = zip.browser_download_url;
+      var v = String(release.tag_name || '').replace(/^v/, '').replace(/[^0-9A-Za-z.\-]/g, '');
+      var mb = Math.round(Number(zip.size) / 1048576) || 0;
+      var spans = document.querySelectorAll('.ver');
+      for (var i = 0; i < spans.length; i++) {
+        var ru = spans[i].parentNode.getAttribute('data-l') === 'ru';
+        spans[i].textContent = ' · v' + v + (mb ? ' · ' + mb + (ru ? ' МБ' : ' MB') : '');
+      }
+    })
+    .catch(function () {});
+  button.addEventListener('click', function () {
+    // After the download starts, show the next steps.
+    setTimeout(function () {
+      document.getElementById('install').scrollIntoView();
+      var steps = document.getElementById('steps');
+      steps.classList.remove('flash'); void steps.offsetWidth; steps.classList.add('flash');
+    }, 400);
+  });
+})();
+</script>
+</body>
+</html>

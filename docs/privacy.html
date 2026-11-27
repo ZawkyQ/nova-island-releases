@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOVA Island — Privacy policy</title>
+<script>
+(function () {
+  var l = new URLSearchParams(location.search).get('lang');
+  if (l !== 'ru' && l !== 'en') { try { l = localStorage.getItem('nova-lang'); } catch (e) { l = null; } }
+  if (l !== 'ru' && l !== 'en') { l = (navigator.language || '').toLowerCase().indexOf('ru') === 0 ? 'ru' : 'en'; }
+  document.documentElement.setAttribute('data-lang', l);
+  document.documentElement.setAttribute('lang', l);
+})();
+</script>
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<meta name="color-scheme" content="dark">
+<style>
+html[data-lang="en"] [data-l="ru"], html[data-lang="ru"] [data-l="en"] { display: none !important; }
+body { margin: 0; background: #090a16; color: #f2f1fb; font: 16px/1.65 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: 40px 24px 70px; }
+a { color: #b9a8ff; }
+h1 { font-size: 2rem; letter-spacing: -.02em; margin: 18px 0 4px; }
+h2 { font-size: 1.2rem; margin: 32px 0 8px; }
+p, li { color: #c4c3dc; }
+li { margin-bottom: 6px; }
+.top { display: flex; align-items: center; justify-content: space-between; }
+.top a { text-decoration: none; color: #f2f1fb; font-weight: 650; display: flex; align-items: center; gap: 10px; }
+button { border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); color: #f2f1fb; border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+:focus-visible { outline: 2px solid #4fa3ff; outline-offset: 3px; border-radius: 6px; }
+.muted { color: #8d8ca8; font-size: 14px; }
+code { font-family: Consolas, monospace; background: rgba(255,255,255,.07); padding: 1px 5px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <a id="home" href="./"><img src="assets/logo.png" alt="" width="28" height="28">NOVA Island</a>
+    <button id="lang" type="button">RU</button>
+  </div>
+
+  <div data-l="en">
+    <h1>Privacy policy</h1>
+    <p class="muted">Applies to NOVA Island 1.6.0 and later. Last updated 27 November 2026.</p>
+    <p>NOVA Island runs on your PC. NOVA itself has no accounts, ads, analytics or telemetry, and the developer receives no data from it. It connects to the services below only for the features listed. Each automatic one can be turned off in Settings; the rest happen only when you click.</p>
+    <h2>What leaves your PC</h2>
+    <ul>
+      <li><b>Lyrics (LRCLIB, lrclib.net):</b> artist, title, album and length of the playing track when a track without a local <code>.lrc</code> file or saved lyrics starts, and the words you type in the manual lyrics search. Off: Settings → Lyrics.</li>
+      <li><b>Voice model (Hugging Face, huggingface.co and its file servers):</b> a download of the speech model (~57 MB; ~31 MB for Tiny), once per model, while voice is on and the model is not on your PC yet. Off: Settings → Voice.</li>
+      <li><b>Updates (GitHub, api.github.com, github.com and its download servers):</b> a check for a new version about a minute after start if “Check at start” is on (it is by default) and when you click “Check now”; the check also reads the public download count. The new version is downloaded only when you click “Download and install”. Off: Settings → About → Updates.</li>
+      <li><b>Discord status:</b> while the Discord app is running on your PC, NOVA gives it the track, artist, album, player, progress, a cover picture and buttons (search links for the track and a link to NOVA's releases). Discord shows them in your status to your friends and to members of your servers, like Spotify does, and loads the pictures itself. To find a cover, artist and title are sent to Apple (itunes.apple.com) and Deezer (api.deezer.com). Off: Settings → Discord.</li>
+      <li><b>Find on YouTube:</b> opens a YouTube search for the playing track's artist and title in your browser, only when you click it. Other links in the app also open in your browser only when you click them.</li>
+    </ul>
+    <p>Each of these requests carries the app's name and version and, like any connection, your IP address. Windows and the bundled Windows App Runtime may send Microsoft diagnostic data, as your Windows privacy settings allow.</p>
+    <h2>What NOVA never sends</h2>
+    <ul>
+      <li>Notification text: shown on the island and never stored.</li>
+      <li>Your voice: the microphone opens only while the island is listening to you, and speech is recognized on your PC.</li>
+      <li>Sound for the equalizer: analysed in memory and dropped at once; nothing is recorded.</li>
+      <li>Your GIFs, videos, themes, profiles, settings and logs. A profile you export holds all your settings (including folder paths and app names) and your GIFs; NOVA never sends it, you choose who gets it.</li>
+    </ul>
+    <p>The services above have their own privacy policies. This website has no cookies or counters. It is hosted on GitHub Pages, its download button asks GitHub's API (api.github.com) for the newest file, and GitHub keeps its own logs. The language you pick is remembered in your browser only.</p>
+    <h2>Contact</h2>
+    <p>Questions: <a href="https://github.com/ZawkyQ/nova-island-releases/issues/new">open an issue on GitHub</a>.</p>
+  </div>
+
+  <div data-l="ru" lang="ru">
+    <h1>Политика конфиденциальности</h1>
+    <p class="muted">Для NOVA Island 1.6.0 и новее. Обновлено 27 ноября 2026 года.</p>
+    <p>NOVA Island работает на вашем компьютере. В самой NOVA нет аккаунтов, рекламы, аналитики и телеметрии, и разработчик не получает от неё никаких данных. К службам ниже она обращается только ради перечисленных функций. Автоматические можно выключить в настройках, остальное происходит только по вашему нажатию.</p>
+    <h2>Что уходит с компьютера</h2>
+    <ul>
+      <li><b>Тексты песен (LRCLIB, lrclib.net):</b> исполнитель, название, альбом и длина играющего трека, когда начинается трек без локального файла <code>.lrc</code> и без сохранённого текста, и слова, которые вы вводите в ручном поиске текста. Выключить: Настройки → Тексты.</li>
+      <li><b>Модель голоса (Hugging Face, huggingface.co и его файловые серверы):</b> загрузка модели распознавания речи (~57 МБ; ~31 МБ для Tiny), один раз для каждой модели, пока голос включён, а модели ещё нет на компьютере. Выключить: Настройки → Голос.</li>
+      <li><b>Обновления (GitHub, api.github.com, github.com и его серверы загрузки):</b> проверка новой версии через минуту после запуска, если включено «Проверять при запуске» (включено по умолчанию), и по кнопке «Проверить сейчас»; заодно читается открытый счётчик скачиваний. Новая версия скачивается только по нажатию «Скачать и установить». Выключить: Настройки → О программе → Обновления.</li>
+      <li><b>Статус в Discord:</b> пока на компьютере запущен Discord, NOVA передаёт ему трек, исполнителя, альбом, плеер, время, обложку и кнопки (ссылки на поиск трека и на выпуски NOVA). Discord показывает их в вашем статусе друзьям и участникам ваших серверов, как у Spotify, и сам загружает картинки. Чтобы найти обложку, исполнитель и название отправляются в Apple (itunes.apple.com) и Deezer (api.deezer.com). Выключить: Настройки → Discord.</li>
+      <li><b>Найти на YouTube:</b> открывает в браузере поиск YouTube по исполнителю и названию играющего трека, только по нажатию. Другие ссылки в программе тоже открываются в браузере только по нажатию.</li>
+    </ul>
+    <p>В каждом из этих запросов есть название и версия программы и, как при любом подключении, ваш IP-адрес. Windows и встроенный Windows App Runtime могут отправлять Microsoft диагностические данные, насколько это разрешают настройки конфиденциальности Windows.</p>
+    <h2>Что NOVA никогда не отправляет</h2>
+    <ul>
+      <li>Текст уведомлений: показывается на острове и нигде не сохраняется.</li>
+      <li>Ваш голос: микрофон включается, только пока остров вас слушает, и речь распознаётся на вашем компьютере.</li>
+      <li>Звук для эквалайзера: разбирается в памяти и сразу забывается, ничего не записывается.</li>
+      <li>Ваши гифки, видео, темы, профили, настройки и журналы. В экспортированном профиле лежат все ваши настройки (в том числе пути к папкам и названия приложений) и гифки; NOVA его никуда не отправляет, кому его дать, решаете вы.</li>
+    </ul>
+    <p>У служб выше свои политики конфиденциальности. На этом сайте нет cookie и счётчиков. Он размещён на GitHub Pages, его кнопка скачивания спрашивает у GitHub API (api.github.com) последний файл, а GitHub ведёт свои журналы. Выбранный язык запоминается только в вашем браузере.</p>
+    <h2>Связь</h2>
+    <p>Вопросы: <a href="https://github.com/ZawkyQ/nova-island-releases/issues/new">напишите в Issues на GitHub</a>.</p>
+  </div>
+</main>
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById('lang'), home = document.getElementById('home');
+  var lang = root.getAttribute('data-lang') === 'ru' ? 'ru' : 'en';
+  function apply(l, remember) {
+    lang = l;
+    root.setAttribute('data-lang', l); root.setAttribute('lang', l);
+    document.title = l === 'ru' ? 'NOVA Island — Политика конфиденциальности' : 'NOVA Island — Privacy policy';
+    btn.textContent = l === 'ru' ? 'EN' : 'RU';
+    btn.setAttribute('aria-label', l === 'ru' ? 'EN — switch to English' : 'RU — переключить на русский');
+    home.setAttribute('href', './?lang=' + l);
+    if (remember) {
+      try { localStorage.setItem('nova-lang', l); } catch (e) {}
+      if (new URLSearchParams(location.search).has('lang')) { history.replaceState(null, '', '?lang=' + l); }
+    }
+  }
+  apply(lang, false);
+  btn.addEventListener('click', function () { apply(lang === 'ru' ? 'en' : 'ru', true); });
+})();
+</script>
+</body>
+</html>
