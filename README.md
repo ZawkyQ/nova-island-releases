@@ -47,7 +47,7 @@ If Windows shows **"Windows protected your PC"**, click **More info → Run anyw
 
 On first start NOVA turns on start with Windows and sets free hotkeys (you can change both in Settings), and Windows asks once for the microphone and notifications.
 
-Requires **Windows 11, x64**. .NET and the Windows App Runtime are inside the package. Windows 10 is not supported. If the voice assistant does not start, install the [Microsoft Visual C++ Redistributable (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe) from Microsoft; many PCs already have it.
+Requires **Windows 11, x64**. .NET, the Windows App Runtime and the Visual C++ runtime the voice assistant needs are inside the package. Windows 10 is not supported.
 
 **Updates** come inside the app: NOVA tells you when a new version is out. Click **Settings → About → Updates → Download and install**, then confirm in the Windows installer window that opens.
 
@@ -102,6 +102,7 @@ Your settings, GIF library, logs and the voice model stay in `%LOCALAPPDATA%\Nov
 - Over exclusive full-screen apps, Windows may not show the island.
 - Shuffle and repeat work only with players that report them to Windows (browsers do not). Windows gives apps no likes or queue.
 - Battery level is shown only for Bluetooth devices that report it to Windows.
+- The voice assistant needs a CPU with AVX2: almost every recent PC, but not some Celeron and Pentium Silver models.
 - Because the certificate is self-signed, SmartScreen may warn about an unknown publisher.
 
 ## Feedback
